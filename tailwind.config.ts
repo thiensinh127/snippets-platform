@@ -1,7 +1,8 @@
-const config = {
-   plugins: {
-    "@tailwindcss/postcss": {
-      darkMode: ["class"],
+import type { Config } from "tailwindcss"
+import tailwindcssAnimate from "tailwindcss-animate"
+
+const config: Config = {
+  darkMode: "class",
   content: [
     "./pages/**/*.{ts,tsx}",
     "./components/**/*.{ts,tsx}",
@@ -73,11 +74,7 @@ const config = {
       },
     },
   },
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  // plugins: [require("tailwindcss-animate")],
-    },
-  },
-  
-};
+  plugins: [tailwindcssAnimate],
+}
 
-export default config;
+export default config
