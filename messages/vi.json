@@ -1,0 +1,47 @@
+{
+  "common": {
+    "brand": "CodeShare",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "signOut": "Đăng xuất",
+    "profile": "Hồ sơ",
+    "back": "Quay lại",
+    "backHome": "Về trang chủ",
+    "addSnippet": " Thêm một snippet mới",
+    "title": "Chia sẻ code cho nhà phát triển",
+    "description": "CodeShare là một trang chia sẻ code cho nhà phát triển",
+    "getStarted": "Bắt đầu miễn phí",
+    "edit": "Chỉnh sửa",
+    "views": "lượt xem",
+    "aboutAuthor": "Về tác giả",
+    "footer": "© 2025 CodeShare. Xây dựng với Next.js & TailwindCSS"
+  },
+  "home": {
+    "empty": "Chưa có snippet nào. Hãy là người đầu tiên chia sẻ!"
+  },
+  "auth": {
+    "welcomeBack": "Chào mừng trở lại",
+    "enterCredentials": "Nhập thông tin để đăng nhập",
+    "createAccount": "Tạo tài khoản",
+    "joinCommunity": "Tham gia cộng đồng lập trình viên",
+    "name": "Họ tên",
+    "username": "Tên người dùng",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "creatingAccount": "Đang tạo tài khoản...",
+    "signingIn": "Đang đăng nhập...",
+    "onlyLettersNumbers": "Chỉ cho phép chữ cái, số, gạch dưới và gạch nối",
+    "passwordPlaceholder": "Tạo mật khẩu mạnh (tối thiểu 6 ký tự)",
+    "enterPassword": "Nhập mật khẩu của bạn",
+    "alreadyHaveAccount": "Đã có tài khoản?",
+    "dontHaveAccount": "Chưa có tài khoản?"
+  },
+  "profile": {
+    "topLanguages": "Ngôn ngữ hàng đầu",
+    "yourSnippets": "Snippet của bạn",
+    "publicSnippets": "Snippet công khai",
+    "youHaventCreated": "Bạn chưa tạo snippet nào",
+    "noSnippets": "Chưa có snippet nào",
+    "createFirst": "Tạo snippet đầu tiên"
+  }
+}

@@ -10,6 +10,7 @@ import { ArrowLeft, Calendar, Code2, Edit, Eye } from "lucide-react";
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const user = await prisma.user.findUnique({
@@ -31,6 +32,7 @@ export default async function ProfilePage({
 }: {
   params: { id: string };
 }) {
+  const t = await getTranslations();
   const session = await getServerSession(authOptions);
 
   const user = await getCachedUserWithSnippets(params.id);
@@ -55,20 +57,16 @@ export default async function ProfilePage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <header className="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-6">
           <Link
             href="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            {t("common.backHome")}
           </Link>
         </div>
-      </header>
-
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Profile Header */}
         <Card className="mb-8">
           <CardContent className="pt-6">
@@ -90,7 +88,7 @@ export default async function ProfilePage({
                   {isOwnProfile && (
                     <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
+                      {t("common.edit")}
                     </Button>
                   )}
                 </div>
@@ -100,18 +98,17 @@ export default async function ProfilePage({
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="h-4 w-4" />
-                    Joined{" "}
                     {formatDistanceToNow(new Date(user.createdAt), {
                       addSuffix: true,
                     })}
                   </span>
                   <span className="flex items-center gap-1">
                     <Code2 className="h-4 w-4" />
-                    {user.snippets.length} snippets
+                    {user.snippets.length} {t("profile.publicSnippets")}
                   </span>
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
-                    {totalViews} total views
+                    {totalViews} {t("common.views")}
                   </span>
                 </div>
               </div>
@@ -123,7 +120,7 @@ export default async function ProfilePage({
         {topLanguages.length > 0 && (
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Top Languages</CardTitle>
+              <CardTitle>{t("profile.topLanguages")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
@@ -140,20 +137,18 @@ export default async function ProfilePage({
         {/* Snippets */}
         <div>
           <h2 className="text-2xl font-bold mb-4">
-            {isOwnProfile ? "Your Snippets" : "Public Snippets"}
+            {isOwnProfile ? t("profile.yourSnippets") : t("profile.publicSnippets")}
           </h2>
 
           {user.snippets.length === 0 ? (
             <Card className="p-12 text-center">
               <Code2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
               <p className="text-xl text-muted-foreground mb-4">
-                {isOwnProfile
-                  ? "You haven't created any snippets yet"
-                  : "No snippets yet"}
+                {isOwnProfile ? t("profile.youHaventCreated") : t("profile.noSnippets")}
               </p>
               {isOwnProfile && (
                 <Link href="/snippets/new">
-                  <Button>Create Your First Snippet</Button>
+                  <Button>{t("profile.createFirst")}</Button>
                 </Link>
               )}
             </Card>

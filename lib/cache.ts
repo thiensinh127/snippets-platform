@@ -132,7 +132,6 @@ export const getCachedUserWithSnippets = cache(async (id: string) => {
 
   if (!user) return null;
 
-  // Flatten tags để dễ render ở UI
   return {
     ...user,
     snippets: user.snippets.map((s) => ({

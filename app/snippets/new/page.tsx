@@ -7,7 +7,7 @@ export default async function NewSnippetPage() {
   const session = await getServerSession(authOptions)
 
   if (!session) {
-    redirect("/login")
+    redirect("/login?callbackUrl=/snippets/new")
   }
 
   return (

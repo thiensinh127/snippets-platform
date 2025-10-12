@@ -11,11 +11,12 @@ import {
 } from "@/components/ui/dialog";
 import { SnippetDTO } from "@/types/snippet";
 import { formatDistanceToNow } from "date-fns";
-import { BookmarkPlus, Clock, Copy, ExternalLink } from "lucide-react";
+import { Clock, Copy, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import ShareButton from "../common/ShareButton";
 
 type Props = {
   open: boolean;
@@ -41,12 +42,11 @@ export default function SnippetDetailDialog({
       <DialogContent
         className="max-w-4xl gap-0 p-0"
         onPointerDownOutside={(e) => {
-          // cho phép chọn/drag code mà không đóng modal ngoài ý muốn
           const el = e.target as HTMLElement;
           if (el.closest("pre")) e.preventDefault();
         }}
       >
-        <DialogHeader className="px-5 pb-3 pt-4">
+        <DialogHeader className="px-6 pb-3 pt-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <DialogTitle className="line-clamp-2 text-xl leading-snug">
@@ -80,7 +80,7 @@ export default function SnippetDetailDialog({
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2 pr-6">
               <Button
                 variant="outline"
                 size="sm"
@@ -97,13 +97,11 @@ export default function SnippetDetailDialog({
                   <ExternalLink className="mr-1 h-4 w-4" /> Open
                 </Button>
               </Link>
-              <Button variant="default" size="sm">
-                <BookmarkPlus className="mr-1 h-4 w-4" /> Save
-              </Button>
+              <ShareButton snippetId={snippet.id} title={snippet.title} />
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground pr-6">
             <Link
               href={`/profile/${snippet.author.username}`}
               className="flex items-center gap-2 hover:text-foreground"
@@ -135,7 +133,7 @@ export default function SnippetDetailDialog({
         </DialogHeader>
 
         {/* Body */}
-        <div className="max-h-[70vh] overflow-auto px-5 pb-5">
+        <div className="max-h-[70vh] overflow-auto px-6 pb-5">
           <div className="overflow-hidden rounded-lg border bg-slate-900">
             <SyntaxHighlighter
               language={snippet.language.toLowerCase()}

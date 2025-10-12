@@ -16,6 +16,7 @@ import { notFound } from "next/navigation";
 import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -82,6 +83,7 @@ export default async function SnippetPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const t = await getTranslations();
   const { id } = await params;
   const session = await getServerSession(authOptions);
   const snippet = await getCachedSnippet(id);
@@ -93,26 +95,24 @@ export default async function SnippetPage({
     <>
       <StructuredData type="article" data={snippet} />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-        {/* Top bar */}
-        <header className="border-b bg-background/70 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="container mx-auto flex items-center justify-between px-4 py-3">
+        <main className="container mx-auto max-w-5xl px-4 py-8">
+          {/* Top actions */}
+          <div className="mb-6 flex items-center justify-between">
             <Link
               href="/"
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="h-4 w-4" />
-              Back
+              {t("common.back")}
             </Link>
-
             <div className="flex items-center gap-2">
               <ShareButton snippetId={snippet.id} title={snippet.title} />
-
               {isAuthor && (
                 <>
                   <Link href={`/snippets/${snippet.id}/edit`}>
                     <Button variant="outline" size="sm">
                       <Edit className="mr-2 h-4 w-4" />
-                      Edit
+                      {t("common.edit")}
                     </Button>
                   </Link>
                   <DeleteButton snippetId={snippet.id} />
@@ -120,9 +120,6 @@ export default async function SnippetPage({
               )}
             </div>
           </div>
-        </header>
-
-        <main className="container mx-auto max-w-5xl px-4 py-8">
           {/* Title + meta */}
           <div className="mb-6">
             <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -182,7 +179,7 @@ export default async function SnippetPage({
 
               <span className="inline-flex items-center gap-1">
                 <Eye className="h-4 w-4" />
-                {snippet.views} views
+                {snippet.views} {t("common.views")}
               </span>
 
               <span className="inline-flex items-center gap-1">
@@ -226,7 +223,7 @@ export default async function SnippetPage({
           {/* Author card */}
           <Card className="mt-6">
             <CardHeader className="pb-4">
-              <h2 className="text-xl font-semibold">About the author</h2>
+              <h2 className="text-xl font-semibold">{t("common.aboutAuthor")}</h2>
             </CardHeader>
             <CardContent>
               <Link
