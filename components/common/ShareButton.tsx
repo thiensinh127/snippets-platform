@@ -1,39 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Share2, Check } from "lucide-react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Share2, Check } from "lucide-react";
+import { toast } from "sonner";
 
-export default function ShareButton({ snippetId, title }: { snippetId: string, title: string }) {
-  const [copied, setCopied] = useState(false)
+export default function ShareButton({
+  snippetId,
+  title,
+}: {
+  snippetId: string;
+  title: string;
+}) {
+  const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/snippets/${snippetId}`
-    
+    const url = `${window.location.origin}/snippets/${snippetId}`;
+
     if (navigator.share) {
       try {
-        await navigator.share({ title, url })
-      } catch (err) {
-        // User cancelled or share failed, fallback to copy
-        copyToClipboard(url)
-      }
-    } else {
-      copyToClipboard(url)
+        await navigator.share({ title, url });
+        return;
+      } catch {}
     }
-  }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    // Fallback: copy link
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    toast.success("Link copied to clipboard");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <Button size="sm" variant="outline" onClick={handleShare}>
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={handleShare}
+      className="transition-all"
+    >
       {copied ? (
         <>
-          <Check className="h-4 w-4 mr-2" />
-          Copied!
+          <Check className="h-4 w-4 mr-2 text-green-600" />
+          Copied
         </>
       ) : (
         <>
@@ -42,5 +50,5 @@ export default function ShareButton({ snippetId, title }: { snippetId: string, t
         </>
       )}
     </Button>
-  )
+  );
 }

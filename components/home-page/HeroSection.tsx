@@ -5,9 +5,12 @@ import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 
-const NewSnippetModal = dynamic(() => import("../snippets/NewSnippetModal"), {
-  ssr: false,
-});
+const NewSnippetModal = dynamic(
+  () => import("../snippets/SnippetUpsertModal"),
+  {
+    ssr: false,
+  }
+);
 
 const HeroSection = ({ session }: { session: any }) => {
   const [open, setOpen] = useState(false);
@@ -20,12 +23,23 @@ const HeroSection = ({ session }: { session: any }) => {
           </Button>
         </Link>
       ) : (
-        <Button size="lg" onClick={() => setOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          New Snippet
-        </Button>
+        <>
+          <h1 className="text-3xl md:text-5xl font-bold mb-4">
+            Share code with developers⚡️
+          </h1>
+          <p className="text-lg text-muted-foreground mb-8">
+            CodeShare is a code sharing platform that allows you to share code
+            with other developers.
+          </p>
+          <Button size="lg" onClick={() => setOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            New Snippet
+          </Button>
+        </>
       )}
-      {open && <NewSnippetModal open={open} onOpenChange={setOpen} />}
+      {open && (
+        <NewSnippetModal mode="create" open={open} onOpenChange={setOpen} />
+      )}
     </section>
   );
 };

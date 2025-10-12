@@ -66,6 +66,7 @@ export async function GET(req: Request) {
     },
   });
 }
+
 // POST create snippet
 export async function POST(req: Request) {
   try {

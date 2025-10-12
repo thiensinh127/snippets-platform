@@ -13,7 +13,7 @@ import { notFound } from "next/navigation";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const user = await prisma.user.findUnique({
-    where: { username: params.id },
+    where: { id: params.id },
   });
 
   if (!user) {

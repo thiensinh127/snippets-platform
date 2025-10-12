@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+
 import "./globals.css";
 
 const geistSans = Geist({
@@ -19,10 +21,20 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: {
     default: "CodeShare - Share Code Snippets with Developers",
-    template: "%s | CodeShare"
+    template: "%s | CodeShare",
   },
-  description: "Discover, share, and learn from code snippets across multiple programming languages. Join our community of developers sharing knowledge through code.",
-  keywords: ["code snippets", "programming", "developer tools", "code sharing", "javascript", "python", "react", "nextjs"],
+  description:
+    "Discover, share, and learn from code snippets across multiple programming languages. Join our community of developers sharing knowledge through code.",
+  keywords: [
+    "code snippets",
+    "programming",
+    "developer tools",
+    "code sharing",
+    "javascript",
+    "python",
+    "react",
+    "nextjs",
+  ],
   authors: [{ name: "CodeShare Team" }],
   creator: "CodeShare",
   publisher: "CodeShare",
@@ -31,32 +43,34 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "http://localhost:3000"),
   alternates: {
-    canonical: '/',
+    canonical: "/",
   },
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: '/',
-    title: 'CodeShare - Share Code Snippets with Developers',
-    description: 'Discover, share, and learn from code snippets across multiple programming languages.',
-    siteName: 'CodeShare',
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "CodeShare - Share Code Snippets with Developers",
+    description:
+      "Discover, share, and learn from code snippets across multiple programming languages.",
+    siteName: "CodeShare",
     images: [
       {
-        url: '/og-image.png',
+        url: "/og-image.png",
         width: 1200,
         height: 630,
-        alt: 'CodeShare - Share Code Snippets',
+        alt: "CodeShare - Share Code Snippets",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'CodeShare - Share Code Snippets with Developers',
-    description: 'Discover, share, and learn from code snippets across multiple programming languages.',
-    images: ['/og-image.png'],
-    creator: '@codeshare',
+    card: "summary_large_image",
+    title: "CodeShare - Share Code Snippets with Developers",
+    description:
+      "Discover, share, and learn from code snippets across multiple programming languages.",
+    images: ["/og-image.png"],
+    creator: "@codeshare",
   },
   robots: {
     index: true,
@@ -64,20 +78,22 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
   verification: {
-    google: 'your-google-verification-code',
+    google: "your-google-verification-code",
   },
 };
 
 export default function RootLayout({
   children,
+  modal,
 }: Readonly<{
   children: React.ReactNode;
+  modal: React.ReactNode;
 }>) {
   return (
     <html lang="en">
@@ -85,6 +101,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        {modal}
+        <Toaster />
       </body>
     </html>
   );
