@@ -18,9 +18,9 @@ type SnippetResp = {
 export default function EditSnippetIntercept({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = React.use(params);
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const [initial, setInitial] = useState<SnippetResp | null>(null);
