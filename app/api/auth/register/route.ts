@@ -1,17 +1,18 @@
-import { hash } from "bcryptjs"
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { hash } from "bcryptjs";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
+export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
-    const { email, password, name, username } = await req.json()
+    const { email, password, name, username } = await req.json();
 
     // Validation
     if (!email || !password || !username) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
-      )
+      );
     }
 
     // Check if user exists
@@ -19,17 +20,17 @@ export async function POST(req: Request) {
       where: {
         OR: [{ email }, { username }],
       },
-    })
+    });
 
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email or username already exists" },
         { status: 400 }
-      )
+      );
     }
 
     // Hash password
-    const hashedPassword = await hash(password, 12)
+    const hashedPassword = await hash(password, 12);
 
     // Create user
     const user = await prisma.user.create({
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
         name,
         username,
       },
-    })
+    });
 
     return NextResponse.json(
       {
@@ -51,12 +52,12 @@ export async function POST(req: Request) {
         },
       },
       { status: 201 }
-    )
+    );
   } catch (error) {
-    console.error("Registration error:", error)
+    console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Something went wrong" },
       { status: 500 }
-    )
+    );
   }
 }

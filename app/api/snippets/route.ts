@@ -6,6 +6,8 @@ import { analyzeComplexity, generateSlug } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+export const runtime = "nodejs";
+
 // GET all snippets
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);

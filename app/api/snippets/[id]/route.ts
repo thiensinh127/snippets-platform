@@ -6,6 +6,8 @@ import { AppError, handleApiError } from "@/lib/error-handler";
 import { analyzeComplexity, generateSlug } from "@/lib/utils";
 import { normalizeTags } from "@/constants";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export async function GET(
   _req: Request,
   context: { params: Promise<{ id: string }> }
