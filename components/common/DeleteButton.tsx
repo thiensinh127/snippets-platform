@@ -17,7 +17,13 @@ import {
 import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export default function DeleteButton({ snippetId }: { snippetId: string }) {
+export default function DeleteButton({
+  snippetId,
+  isText = true,
+}: {
+  snippetId: string;
+  isText?: boolean;
+}) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [open, setOpen] = useState(false);
@@ -32,7 +38,6 @@ export default function DeleteButton({ snippetId }: { snippetId: string }) {
       if (res.ok) {
         toast.success("Snippet deleted successfully");
         setOpen(false);
-        router.push("/");
         router.refresh();
       } else {
         const err = await res.json();
@@ -57,13 +62,13 @@ export default function DeleteButton({ snippetId }: { snippetId: string }) {
         >
           {isDeleting ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Deleting...
+              <Loader2 className={`h-4 w-4 animate-spin ${isText && "mr-2"}`} />
+              {isText && "Deleting..."}
             </>
           ) : (
             <>
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
+              <Trash2 className={`h-4 w-4 ${isText && "mr-2"}`} />
+              {isText && "Delete"}
             </>
           )}
         </Button>

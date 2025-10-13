@@ -1,14 +1,13 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { Bookmark, Clock, PlusCircle } from "lucide-react";
+import { Clock } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -26,6 +25,7 @@ import {
 import { SnippetDTO } from "@/types/snippet";
 import dynamic from "next/dynamic";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import ShareButton from "./ShareButton";
 
 const SnippetDetailDialog = dynamic(
   () => import("../snippets/SnippetDetailDialog"),
@@ -34,9 +34,14 @@ const SnippetDetailDialog = dynamic(
   }
 );
 
-type Props = { snippet: SnippetDTO };
+type Props = {
+  snippet: SnippetDTO;
+  actions?: React.ReactNode;
+  compact?: boolean;
+  isPrivate?: boolean;
+};
 
-export function SnippetCard({ snippet }: Props) {
+export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
   const createdAt = useMemo(
     () =>
       snippet.createdAt instanceof Date
@@ -45,18 +50,16 @@ export function SnippetCard({ snippet }: Props) {
     [snippet.createdAt]
   );
 
-  const [quickSaved, setQuickSaved] = useState(false);
   const [open, setOpen] = useState(false);
-
-  const onQuickSave = (s: SnippetDTO) => {
-    setQuickSaved((v) => !v);
-    navigator?.clipboard?.writeText?.(s.code);
-  };
 
   return (
     <>
       <Card
-        onClick={() => setOpen(true)}
+        onClick={(e) => {
+          const t = e.target as HTMLElement;
+          if (t.closest("[data-prevent-card-open]")) return;
+          setOpen(true);
+        }}
         className="group flex h-full flex-col gap-0 transition-shadow hover:shadow-lg cursor-pointer"
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
@@ -75,40 +78,36 @@ export function SnippetCard({ snippet }: Props) {
             <div className="min-w-0 flex-1">
               <div className=" flex items-center gap-2 justify-between">
                 <CardTitle className="line-clamp-2 leading-snug">
-                  <Link
-                    href={`/snippets/${snippet.id}`}
-                    className="hover:underline"
-                  >
-                    {snippet.title}
-                  </Link>
+                  {snippet.title}
                 </CardTitle>
                 <Badge variant="outline" className="capitalize text-xs">
                   {snippet.language}
                 </Badge>
               </div>
             </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={quickSaved ? "Saved" : "Quick save"}
-                    onClick={() => onQuickSave(snippet)}
-                    className="shrink-0"
-                  >
-                    {quickSaved ? (
-                      <Bookmark className="h-5 w-5" />
-                    ) : (
-                      <PlusCircle className="h-5 w-5" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="text-xs">
-                  {quickSaved ? "Saved to your list" : "Quick save"}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+
+            <div
+              className="flex items-center gap-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {!isPrivate && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <ShareButton
+                        isText={false}
+                        snippetId={snippet.id}
+                        title={snippet.title}
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="text-xs">
+                      Share
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+              {actions ? <div data-prevent-card-open>{actions}</div> : null}
+            </div>
           </div>
           {snippet.description ? (
             <CardDescription className="line-clamp-1">
@@ -138,13 +137,13 @@ export function SnippetCard({ snippet }: Props) {
 
           {/* Code Preview: fixed height + overflow hidden + hover feedback */}
           <div
-            className="
+            className={`
             relative mb-4 overflow-hidden rounded-md border
-            bg-slate-900 h-48 md:h-80
+            bg-slate-900 ${compact ? "h-40 md:h-56" : "h-48 md:h-80"}
             transition-colors
             focus-within:border-slate-600
             group-hover:border-yellow-500
-            "
+            `}
             title="Click and drag to select code"
           >
             <div className="h-full w-full">

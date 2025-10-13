@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
-import { ThemeProvider } from "@/components/common/ThemeProvider";
-import SiteHeader from "@/components/common/SiteHeader";
 import SiteFooter from "@/components/common/SiteFooter";
-import { cookies } from "next/headers";
-import { defaultLocale, isLocale, Locale, locales } from "@/lib/i18n";
+import SiteHeader from "@/components/common/SiteHeader";
+import { ThemeProvider } from "@/components/common/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
+import { defaultLocale, isLocale, Locale } from "@/lib/i18n";
+import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 
 import "./globals.css";
 
@@ -116,9 +116,15 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <ThemeProvider>
-          <NextIntlClientProvider messages={messages} locale={locale} timeZone="UTC">
+          <NextIntlClientProvider
+            messages={messages}
+            locale={locale}
+            timeZone="UTC"
+          >
             <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
               {/* Global Header */}
               <SiteHeader />

@@ -47,6 +47,14 @@ export default function EditSnippetIntercept({
         setOpen(o);
         if (!o) router.back();
       }}
+      onSuccess={async () => {
+        const res = await fetch(`/api/snippets/${id}`, { cache: "no-store" });
+        if (res.ok) {
+          const data: SnippetResp = await res.json();
+          setInitial(data);
+        }
+        router.refresh();
+      }}
       initial={initial ?? undefined}
     />
   );

@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 import ThemeToggle from "@/components/common/ThemeToggle";
 import { getTranslations } from "next-intl/server";
+import MobileNav from "@/components/common/MobileNav";
 
 export default async function SiteHeader() {
   const session = await getServerSession(authOptions);
@@ -19,7 +20,8 @@ export default async function SiteHeader() {
           <span className="text-2xl font-bold">{t("common.brand")}</span>
         </Link>
 
-        <nav className="flex items-center gap-2 sm:gap-3">
+        {/* Desktop nav */}
+        <nav className="hidden sm:flex items-center gap-2 sm:gap-3">
           <LanguageSwitcher />
           <ThemeToggle />
           {session ? (
@@ -42,6 +44,14 @@ export default async function SiteHeader() {
             </>
           )}
         </nav>
+
+        {/* Mobile nav */}
+        <div className="sm:hidden">
+          <MobileNav
+            isAuthenticated={!!session}
+            profileHref={session ? `/profile/${session.user.id}` : undefined}
+          />
+        </div>
       </div>
     </header>
   );

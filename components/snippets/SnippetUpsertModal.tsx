@@ -34,12 +34,21 @@ const schema = z.object({
   code: z.string().min(1),
 });
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = {
+  title: string;
+  description?: string;
+  tags?: string[];
+  isPublic?: boolean;
+  fileName: string;
+  language: string;
+  code: string;
+};
 
 type SnippetUpsertModalProps = {
   mode: "create" | "edit";
   open: boolean;
   onOpenChange: (o: boolean) => void;
+  onSuccess?: (snippet: any) => void;
   initial?: {
     id: string;
     title: string;
@@ -56,12 +65,14 @@ export default function SnippetUpsertModal({
   mode,
   open,
   onOpenChange,
+  onSuccess,
   initial,
 }: SnippetUpsertModalProps) {
   const router = useRouter();
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [allTags, setAllTags] = React.useState<TagOption[]>([]);
+  const isLoadingEdit = mode === "edit" && !initial;
 
   const {
     register,
@@ -127,9 +138,9 @@ export default function SnippetUpsertModal({
         description: data.description,
         code: data.code,
         language: data.language,
-        isPublic: data.isPublic,
+        isPublic: data.isPublic ?? true,
         fileName: data.fileName,
-        tags: data.tags,
+        tags: data.tags ?? [],
       };
 
       const endpoint =
@@ -150,8 +161,12 @@ export default function SnippetUpsertModal({
       }
 
       const j = await res.json();
+      // Inform parent with latest data
+      onSuccess?.(j);
       onOpenChange(false);
-      router.push(`/snippets/${j.id ?? initial?.id}`);
+      if (mode === "create") {
+        router.push(`/snippets/${j.id}`);
+      }
       router.refresh();
     } catch (e: any) {
       setError(e.message || "Unknown error");
@@ -176,85 +191,104 @@ export default function SnippetUpsertModal({
           </DialogHeader>
         </div>
 
-        <div className="max-h-[calc(100vh-300px)] space-y-6 overflow-auto px-6 py-5">
-          {error && (
-            <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">
-              <AlertCircle className="h-4 w-4 text-red-600" />
-              <span className="text-sm text-red-800">{error}</span>
-            </div>
-          )}
-
-          <Input
-            placeholder="Snippet title"
-            {...register("title")}
-            className={cn("text-lg", errors.title && "border-red-500")}
-          />
-          <Textarea
-            rows={3}
-            placeholder="Description (optional)"
-            {...register("description")}
-          />
-
-          <Card className="border-dashed">
-            <div className="flex items-center gap-3 border-b px-4 py-3">
-              <div className="w-64">
-                <Input
-                  placeholder="fileName (eg: foobar.js)"
-                  {...register("fileName")}
-                />
+        {isLoadingEdit ? (
+          <div className="max-h-[calc(100vh-300px)] space-y-6 overflow-auto px-6 py-5">
+            <div className="h-10 w-2/3 bg-muted rounded animate-pulse" />
+            <div className="h-20 w-full bg-muted rounded animate-pulse" />
+            <Card className="border-dashed">
+              <div className="flex items-center gap-3 border-b px-4 py-3">
+                <div className="w-64 h-10 bg-muted rounded animate-pulse" />
+                <div className="h-10 w-40 bg-muted rounded animate-pulse" />
+                <div className="ml-auto h-10 w-56 bg-muted rounded animate-pulse" />
               </div>
-
-              <div>
-                <SearchableSelect
-                  value={watch("language")}
-                  onChange={(v) =>
-                    setValue("language", v, { shouldValidate: true })
-                  }
-                  options={LANGUAGES.map((l) => ({ label: l, value: l }))}
-                  placeholder="Text"
-                />
+              <div className="p-4">
+                <div className="h-64 bg-muted rounded animate-pulse" />
               </div>
-
-              <div className="ml-auto">
-                <Controller
-                  control={control}
-                  name="tags"
-                  render={({ field }) => (
-                    <TagMultiSelect
-                      value={field.value ?? []}
-                      onChange={field.onChange}
-                      options={allTags}
-                      placeholder="Select or create tags"
-                    />
-                  )}
-                />
-              </div>
-            </div>
-
-            <div className="p-4">
-              <SnippetFileEditor
-                value={watch("code")}
-                onChange={(v) => setValue("code", v, { shouldValidate: true })}
-                invalid={!!errors.code}
-              />
-              {errors.code && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.code.message}
-                </p>
+            </Card>
+          </div>
+        ) : (
+          <>
+            <div className="max-h-[calc(100vh-300px)] space-y-6 overflow-auto px-6 py-5">
+              {error && (
+                <div className="flex items-center gap-2 rounded-md border border-red-200 bg-red-50 p-3">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <span className="text-sm text-red-800">{error}</span>
+                </div>
               )}
+
+              <Input
+                placeholder="Snippet title"
+                {...register("title")}
+                className={cn("text-lg", errors.title && "border-red-500")}
+              />
+              <Textarea
+                rows={3}
+                placeholder="Description (optional)"
+                {...register("description")}
+              />
+
+              <Card className="border-dashed">
+                <div className="flex items-center gap-3 border-b px-4 py-3">
+                  <div className="w-64">
+                    <Input
+                      placeholder="fileName (eg: foobar.js)"
+                      {...register("fileName")}
+                    />
+                  </div>
+
+                  <div>
+                    <SearchableSelect
+                      value={watch("language")}
+                      onChange={(v) =>
+                        setValue("language", v, { shouldValidate: true })
+                      }
+                      options={LANGUAGES.map((l) => ({ label: l, value: l }))}
+                      placeholder="Text"
+                    />
+                  </div>
+
+                  <div className="ml-auto">
+                    <Controller
+                      control={control}
+                      name="tags"
+                      render={({ field }) => (
+                        <TagMultiSelect
+                          value={field.value ?? []}
+                          onChange={field.onChange}
+                          options={allTags}
+                          placeholder="Select or create tags"
+                        />
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div className="p-4">
+                  <SnippetFileEditor
+                    value={watch("code")}
+                    onChange={(v) => setValue("code", v, { shouldValidate: true })}
+                    invalid={!!errors.code}
+                  />
+                  {errors.code && (
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.code.message}
+                    </p>
+                  )}
+                </div>
+              </Card>
             </div>
-          </Card>
-        </div>
 
-        <Separator />
+            <Separator />
 
-        <SnippetFormFooter
-          isPublic={watch("isPublic")}
-          onPublicChange={(v) => setValue("isPublic", v)}
-          onDiscard={() => onOpenChange(false)}
-          onSave={handleSubmit(onSubmit)}
-          saving={saving}
-        />
+            <SnippetFormFooter
+              isPublic={watch("isPublic") ?? true}
+              onPublicChange={(v) => setValue("isPublic", v)}
+              onDiscard={() => onOpenChange(false)}
+              onSave={handleSubmit(onSubmit)}
+              saving={saving}
+            />
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );

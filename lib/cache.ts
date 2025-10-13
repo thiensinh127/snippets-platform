@@ -117,7 +117,6 @@ export const getCachedUserWithSnippets = cache(async (id: string) => {
     where: { id },
     include: {
       snippets: {
-        where: { isPublic: true },
         orderBy: { createdAt: "desc" },
         include: {
           tags: {

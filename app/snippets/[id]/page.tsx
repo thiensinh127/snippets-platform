@@ -11,12 +11,11 @@ import { getCachedSnippet } from "@/lib/cache";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Clock, Edit, Eye } from "lucide-react";
 import { getServerSession } from "next-auth";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import React from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({
   params,
@@ -223,7 +222,9 @@ export default async function SnippetPage({
           {/* Author card */}
           <Card className="mt-6">
             <CardHeader className="pb-4">
-              <h2 className="text-xl font-semibold">{t("common.aboutAuthor")}</h2>
+              <h2 className="text-xl font-semibold">
+                {t("common.aboutAuthor")}
+              </h2>
             </CardHeader>
             <CardContent>
               <Link

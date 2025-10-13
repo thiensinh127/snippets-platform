@@ -1,3 +1,5 @@
+import DeleteButton from "@/components/common/DeleteButton";
+import { SnippetCard } from "@/components/common/SnippetCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -5,12 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { authOptions } from "@/lib/auth";
 import { getCachedUserWithSnippets } from "@/lib/cache";
 import { prisma } from "@/lib/prisma";
+import { SnippetDTO } from "@/types/snippet";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Calendar, Code2, Edit, Eye } from "lucide-react";
 import { getServerSession } from "next-auth";
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const user = await prisma.user.findUnique({
@@ -36,7 +39,6 @@ export default async function ProfilePage({
   const session = await getServerSession(authOptions);
 
   const user = await getCachedUserWithSnippets(params.id);
-  console.log(user);
 
   if (!user) {
     notFound();
@@ -44,6 +46,35 @@ export default async function ProfilePage({
 
   const isOwnProfile = session?.user?.id === user.id;
   const totalViews = user.snippets.reduce((sum, s) => sum + s.views, 0);
+  const publicSnippets = user.snippets.filter((s) => s.isPublic);
+  const privateSnippets = user.snippets.filter((s) => !s.isPublic);
+
+  const toDTO = (s: any): SnippetDTO => ({
+    id: s.id,
+    title: s.title,
+    description: s.description ?? undefined,
+    code: s.code,
+    language: s.language,
+    fileName: s.fileName ?? undefined,
+    complexity: s.complexity ?? undefined,
+    isPublic: s.isPublic,
+    views: s.views ?? 0,
+    slug: s.slug,
+    createdAt: new Date(s.createdAt),
+    updatedAt: new Date(s.updatedAt ?? s.createdAt),
+    author: {
+      id: user.id,
+      name: user.name ?? user.username,
+      username: user.username,
+      avatarUrl: (user as any)?.avatarUrl ?? undefined,
+    },
+    authorId: user.id,
+    tags: (s.tags ?? []).map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      slug: t.slug,
+    })),
+  });
 
   // Get language stats
   const languageStats = user.snippets.reduce((acc, snippet) => {
@@ -137,79 +168,78 @@ export default async function ProfilePage({
         {/* Snippets */}
         <div>
           <h2 className="text-2xl font-bold mb-4">
-            {isOwnProfile ? t("profile.yourSnippets") : t("profile.publicSnippets")}
+            {isOwnProfile
+              ? t("profile.yourSnippets")
+              : t("profile.publicSnippets")}
           </h2>
 
-          {user.snippets.length === 0 ? (
-            <Card className="p-12 text-center">
-              <Code2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <p className="text-xl text-muted-foreground mb-4">
-                {isOwnProfile ? t("profile.youHaventCreated") : t("profile.noSnippets")}
-              </p>
-              {isOwnProfile && (
-                <Link href="/snippets/new">
-                  <Button>{t("profile.createFirst")}</Button>
-                </Link>
-              )}
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {user.snippets.map((snippet) => (
-                <Card
-                  key={snippet.id}
-                  className="hover:shadow-lg transition-shadow"
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between mb-2">
-                      <Badge variant="secondary">{snippet.language}</Badge>
-                      {snippet.complexity && (
-                        <Badge variant="outline">{snippet.complexity}</Badge>
-                      )}
-                    </div>
-                    <CardTitle className="line-clamp-2">
-                      <Link
-                        href={`/snippets/${snippet.id}`}
-                        className="hover:underline"
-                      >
-                        {snippet.title}
-                      </Link>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {snippet.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-4">
-                        {snippet.tags.slice(0, 3).map((tag) => (
-                          <Badge
-                            key={tag.id}
-                            variant="outline"
-                            className="text-xs"
-                          >
-                            {tag.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+          {/* Public snippets */}
+          <div className="mb-6">
+            {publicSnippets.length === 0 ? (
+              <Card className="p-8 text-center">
+                <p className="text-muted-foreground">
+                  {t("profile.noSnippets")}
+                </p>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {publicSnippets.map((s) => (
+                  <SnippetCard
+                    key={s.id}
+                    snippet={toDTO(s)}
+                    compact
+                    actions={
+                      isOwnProfile ? (
+                        <div className="flex items-center gap-2">
+                          <Link href={`/snippets/${s.id}/edit`}>
+                            <Button variant="outline" size="sm">
+                              {t("common.edit")}
+                            </Button>
+                          </Link>
+                          <DeleteButton isText={false} snippetId={s.id} />
+                        </div>
+                      ) : undefined
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </div>
 
-                    <div className="bg-slate-900 rounded-md p-3 mb-4 overflow-hidden">
-                      <pre className="text-xs text-slate-300 line-clamp-3">
-                        <code>{snippet.code}</code>
-                      </pre>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Eye className="h-3 w-3" />
-                        {snippet.views}
-                      </span>
-                      <span>
-                        {formatDistanceToNow(new Date(snippet.createdAt), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                    </div>
-                  </CardContent>
+          {/* Private snippets (only for owner) */}
+          {isOwnProfile && (
+            <div>
+              <h3 className="text-xl font-semibold mb-3">
+                {t("profile.privateSnippets")}
+              </h3>
+              {privateSnippets.length === 0 ? (
+                <Card className="p-8 text-center">
+                  <p className="text-muted-foreground mb-4">
+                    {t("profile.noSnippets")}
+                  </p>
                 </Card>
-              ))}
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {privateSnippets.map((s) => (
+                    <SnippetCard
+                      key={s.id}
+                      snippet={toDTO(s)}
+                      compact
+                      isPrivate={true}
+                      actions={
+                        <div className="flex items-center gap-2">
+                          <Link href={`/snippets/${s.id}/edit`}>
+                            <Button variant="outline" size="sm">
+                              {t("common.edit")}
+                            </Button>
+                          </Link>
+                          <DeleteButton isText={false} snippetId={s.id} />
+                        </div>
+                      }
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
