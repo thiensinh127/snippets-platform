@@ -24,6 +24,7 @@ const eslintConfig = [
     files: ["**/*.ts", "**/*.tsx"],
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
+      "react/no-unescaped-entities": "off",
     },
   },
 ];

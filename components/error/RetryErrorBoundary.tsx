@@ -1,85 +1,95 @@
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertTriangle, RefreshCw, Home, Info } from 'lucide-react'
-import Link from 'next/link'
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { AlertTriangle, RefreshCw, Home, Info } from "lucide-react";
+import Link from "next/link";
 
 interface RetryErrorBoundaryState {
-  hasError: boolean
-  error?: Error
-  retryCount: number
+  hasError: boolean;
+  error?: Error;
+  retryCount: number;
 }
 
 interface RetryErrorBoundaryProps {
-  children: React.ReactNode
-  maxRetries?: number
-  onRetry?: (retryCount: number) => void
-  fallback?: React.ComponentType<{ 
-    error: Error; 
-    retry: () => void; 
-    retryCount: number; 
+  children: React.ReactNode;
+  maxRetries?: number;
+  onRetry?: (retryCount: number) => void;
+  fallback?: React.ComponentType<{
+    error: Error;
+    retry: () => void;
+    retryCount: number;
     maxRetries: number;
-  }>
+  }>;
 }
 
-export class RetryErrorBoundary extends React.Component<RetryErrorBoundaryProps, RetryErrorBoundaryState> {
-  private retryTimeoutId: NodeJS.Timeout | null = null
+export class RetryErrorBoundary extends React.Component<
+  RetryErrorBoundaryProps,
+  RetryErrorBoundaryState
+> {
+  private retryTimeoutId: NodeJS.Timeout | null = null;
 
   constructor(props: RetryErrorBoundaryProps) {
-    super(props)
-    this.state = { hasError: false, retryCount: 0 }
+    super(props);
+    this.state = { hasError: false, retryCount: 0 };
   }
 
   static getDerivedStateFromError(error: Error): RetryErrorBoundaryState {
-    return { hasError: true, error, retryCount: 0 }
+    return { hasError: true, error, retryCount: 0 };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('RetryErrorBoundary caught an error:', error, errorInfo)
+    console.error("RetryErrorBoundary caught an error:", error, errorInfo);
   }
 
   componentWillUnmount() {
     if (this.retryTimeoutId) {
-      clearTimeout(this.retryTimeoutId)
+      clearTimeout(this.retryTimeoutId);
     }
   }
 
   handleRetry = () => {
-    const { maxRetries = 3, onRetry } = this.props
-    const { retryCount } = this.state
+    const { maxRetries = 3, onRetry } = this.props;
+    const { retryCount } = this.state;
 
     if (retryCount < maxRetries) {
-      this.setState({ 
-        hasError: false, 
-        error: undefined, 
-        retryCount: retryCount + 1 
-      })
-      
-      onRetry?.(retryCount + 1)
-      
+      this.setState({
+        hasError: false,
+        error: undefined,
+        retryCount: retryCount + 1,
+      });
+
+      onRetry?.(retryCount + 1);
+
       // Auto-retry with exponential backoff
       this.retryTimeoutId = setTimeout(() => {
-        this.setState({ hasError: false })
-      }, Math.pow(2, retryCount) * 1000)
+        this.setState({ hasError: false });
+      }, Math.pow(2, retryCount) * 1000);
     }
-  }
+  };
 
   render() {
-    const { hasError, error, retryCount } = this.state
-    const { children, maxRetries = 3, fallback } = this.props
+    const { hasError, error, retryCount } = this.state;
+    const { children, maxRetries = 3, fallback } = this.props;
 
     if (hasError) {
       if (fallback) {
-        const FallbackComponent = fallback
+        const FallbackComponent = fallback;
         return (
-          <FallbackComponent 
-          error={error!} 
-          retry={this.handleRetry}
-          retryCount={retryCount}
-          maxRetries={maxRetries}
-        />
+          <FallbackComponent
+            error={error!}
+            retry={this.handleRetry}
+            retryCount={retryCount}
+            maxRetries={maxRetries}
+          />
+        );
       }
 
       return (
@@ -99,14 +109,14 @@ export class RetryErrorBoundary extends React.Component<RetryErrorBoundaryProps,
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {process.env.NODE_ENV === 'development' && error && (
+              {process.env.NODE_ENV === "development" && error && (
                 <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-3">
                   <p className="text-sm text-red-800 dark:text-red-200 font-mono">
                     {error.message}
                   </p>
                 </div>
               )}
-              
+
               {retryCount < maxRetries && (
                 <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
                   <Info className="h-4 w-4 text-blue-600 dark:text-blue-400" />
@@ -115,7 +125,7 @@ export class RetryErrorBoundary extends React.Component<RetryErrorBoundaryProps,
                   </span>
                 </div>
               )}
-              
+
               <div className="flex flex-col gap-2">
                 {retryCount < maxRetries ? (
                   <Button onClick={this.handleRetry} className="w-full">
@@ -123,12 +133,16 @@ export class RetryErrorBoundary extends React.Component<RetryErrorBoundaryProps,
                     Retry Now ({retryCount + 1}/{maxRetries})
                   </Button>
                 ) : (
-                  <Button onClick={this.handleRetry} variant="outline" className="w-full">
+                  <Button
+                    onClick={this.handleRetry}
+                    variant="outline"
+                    className="w-full"
+                  >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Try Again
                   </Button>
                 )}
-                
+
                 <Button variant="ghost" asChild className="w-full">
                   <Link href="/">
                     <Home className="h-4 w-4 mr-2" />
@@ -139,9 +153,9 @@ export class RetryErrorBoundary extends React.Component<RetryErrorBoundaryProps,
             </CardContent>
           </Card>
         </div>
-      )
+      );
     }
 
-    return children
+    return children;
   }
 }
