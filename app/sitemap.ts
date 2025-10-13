@@ -3,29 +3,31 @@ import { prisma } from '@/lib/prisma'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-  
-  // Get all public snippets
-  const snippets = await prisma.snippet.findMany({
-    where: { isPublic: true },
-    select: {
-      id: true,
-      updatedAt: true,
-    },
-    orderBy: { updatedAt: 'desc' },
-  })
 
-  // Get all users with public snippets
-  const users = await prisma.user.findMany({
-    where: {
-      snippets: {
-        some: { isPublic: true }
-      }
-    },
-    select: {
-      username: true,
-      updatedAt: true,
-    },
-  })
+  // Default fallbacks to avoid failing build if DB is unavailable
+  let snippets: { id: string; updatedAt: Date }[] = []
+  let users: { username: string; updatedAt: Date }[] = []
+
+  try {
+    // Get all public snippets
+    snippets = await prisma.snippet.findMany({
+      where: { isPublic: true },
+      select: { id: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+    })
+  } catch (e) {
+    // noop: fall back to static pages only
+  }
+
+  try {
+    // Get all users with public snippets
+    users = await prisma.user.findMany({
+      where: { snippets: { some: { isPublic: true } } },
+      select: { username: true, updatedAt: true },
+    })
+  } catch (e) {
+    // noop: fall back to static + snippet pages (if any)
+  }
 
   // Static pages
   const staticPages = [
