@@ -20,9 +20,9 @@ import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = await params;
   const snippet = await getCachedSnippet(id);
   if (!snippet) return { title: "Snippet not found" };
 
@@ -80,10 +80,10 @@ export async function generateMetadata({
 export default async function SnippetPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const t = await getTranslations();
-  const { id } = params;
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   const snippet = await getCachedSnippet(id);
   if (!snippet) notFound();

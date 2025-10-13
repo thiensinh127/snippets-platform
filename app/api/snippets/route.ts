@@ -2,6 +2,7 @@ import { normalizeTags } from "@/constants";
 import { authOptions } from "@/lib/auth";
 import { AppError, handleApiError } from "@/lib/error-handler";
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { analyzeComplexity, generateSlug } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -18,7 +19,7 @@ export async function GET(req: Request) {
   const pageSize = Math.min(Number(searchParams.get("pageSize") || "12"), 50);
   const skip = (page - 1) * pageSize;
 
-  const where: any = {
+  const where: Prisma.SnippetWhereInput = {
     isPublic: true,
     ...(language ? { language } : {}),
     ...(q
@@ -57,8 +58,30 @@ export async function GET(req: Request) {
 
   return Response.json({
     items: items.map((s) => ({
-      ...s,
-      tags: s.tags.map((st) => ({ name: st.tag.name, slug: st.tag.slug })),
+      id: s.id,
+      title: s.title,
+      description: s.description ?? undefined,
+      code: s.code,
+      language: s.language,
+      fileName: s.fileName ?? undefined,
+      complexity: s.complexity ?? undefined,
+      isPublic: s.isPublic,
+      views: s.views,
+      slug: s.slug,
+      createdAt: s.createdAt,
+      updatedAt: s.updatedAt,
+      author: {
+        id: s.author.id,
+        name: s.author.name ?? "",
+        username: s.author.username,
+        avatarUrl: s.author.avatar ?? "",
+      },
+      authorId: s.author.id,
+      tags: s.tags.map((st) => ({
+        id: st.tag.id,
+        name: st.tag.name,
+        slug: st.tag.slug,
+      })),
     })),
     meta: {
       page,
