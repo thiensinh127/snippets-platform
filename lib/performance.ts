@@ -1,7 +1,10 @@
 // Performance monitoring utilities
 
-export function measurePerformance(name: string, fn: () => Promise<any> | any) {
-  return async (...args: any[]) => {
+export function measurePerformance<A extends any[], R>(
+  name: string,
+  fn: (...args: A) => Promise<R> | R
+) {
+  return async (...args: A): Promise<R> => {
     const start = performance.now()
     const result = await fn(...args)
     const end = performance.now()

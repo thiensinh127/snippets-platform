@@ -8,11 +8,12 @@ import { normalizeTags } from "@/constants";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const snippet = await prisma.snippet.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         author: {
           select: { id: true, username: true, name: true, avatar: true },
@@ -44,14 +45,15 @@ export async function GET(
  * */
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) throw new AppError("Unauthorized", 401);
 
+    const { id } = await context.params;
     const existing = await prisma.snippet.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { id: true, authorId: true },
     });
     if (!existing) throw new AppError("Snippet not found", 404);
@@ -87,7 +89,7 @@ export async function PATCH(
 
     if (!Array.isArray(tags)) {
       const updated = await prisma.snippet.update({
-        where: { id: params.id },
+        where: { id },
         data: dataUpdate,
         include,
       });
@@ -107,12 +109,12 @@ export async function PATCH(
     const normTags = normalizeTags(tags);
     const result = await prisma.$transaction(async (tx) => {
       await tx.snippet.update({
-        where: { id: params.id },
+        where: { id },
         data: dataUpdate,
       });
 
       await tx.snippetTag.deleteMany({
-        where: { snippetId: params.id },
+        where: { snippetId: id },
       });
 
       for (const t of normTags) {
@@ -124,12 +126,12 @@ export async function PATCH(
         });
 
         await tx.snippetTag.create({
-          data: { snippetId: params.id, tagId: tag.id },
+          data: { snippetId: id, tagId: tag.id },
         });
       }
 
       return tx.snippet.findUnique({
-        where: { id: params.id },
+        where: { id },
         include,
       });
     });
@@ -158,21 +160,22 @@ export async function PATCH(
  */
 export async function DELETE(
   _req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) throw new AppError("Unauthorized", 401);
 
+    const { id } = await context.params;
     const existing = await prisma.snippet.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: { id: true, authorId: true },
     });
     if (!existing) throw new AppError("Snippet not found", 404);
     if (existing.authorId !== session.user.id)
       throw new AppError("Forbidden", 403);
 
-    await prisma.snippet.delete({ where: { id: params.id } });
+    await prisma.snippet.delete({ where: { id } });
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
