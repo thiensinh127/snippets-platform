@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,11 +10,13 @@ import { PasswordInput } from "@/components/ui/password-input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Code2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 export default function RegisterPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const t = useTranslations()
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -42,7 +45,21 @@ export default function RegisterPage() {
         return
       }
 
-      router.push("/login?registered=true")
+      const loginResult = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      })
+
+      if (loginResult?.error) {
+        setError("Registration succeeded, but automatic login failed. Please sign in.")
+        router.push("/login?registered=true")
+        setIsLoading(false)
+        return
+      }
+
+      router.push("/")
+      router.refresh()
     } catch (error) {
       setError("Something went wrong")
       setIsLoading(false)
@@ -56,9 +73,9 @@ export default function RegisterPage() {
           <div className="flex items-center justify-center mb-4">
             <Code2 className="h-12 w-12 text-primary" />
           </div>
-          <CardTitle className="text-2xl text-center">Create an account</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("auth.createAccount")}</CardTitle>
           <CardDescription className="text-center">
-            Join the developer community
+            {t("auth.joinCommunity")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -69,7 +86,7 @@ export default function RegisterPage() {
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("auth.name")}</Label>
               <Input
                 id="name"
                 name="name"
@@ -79,7 +96,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">{t("auth.username")}</Label>
               <Input
                 id="username"
                 name="username"
@@ -87,11 +104,11 @@ export default function RegisterPage() {
                 required
                 disabled={isLoading}
                 pattern="[a-zA-Z0-9_-]+"
-                title="Only letters, numbers, underscore and hyphen"
+                title={t("auth.onlyLettersNumbers")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 name="email"
@@ -102,11 +119,11 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("auth.password")}</Label>
               <PasswordInput
                 id="password"
                 name="password"
-                placeholder="Create a strong password (min 6 characters)"
+                placeholder={t("auth.passwordPlaceholder")}
                 required
                 disabled={isLoading}
                 minLength={6}
@@ -114,15 +131,15 @@ export default function RegisterPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Sign Up"}
+              {isLoading ? t("auth.creatingAccount") : t("common.signUp")}
             </Button>
           </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-muted-foreground text-center">
-            Already have an account?{" "}
+            {t("auth.alreadyHaveAccount")} {" "}
             <Link href="/login" className="text-primary hover:underline">
-              Sign in
+              {t("common.signIn")}
             </Link>
           </div>
         </CardFooter>

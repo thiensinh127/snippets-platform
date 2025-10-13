@@ -1,0 +1,48 @@
+{
+  "common": {
+    "brand": "CodeShare",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "profile": "Profile",
+    "back": "Back",
+    "backHome": "Back to Home",
+    "addSnippet": " Add a new snnipet",
+    "title": "Share code with developers",
+    "description": "   CodeShare is a code sharing platform that allows you to share code with other developers.",
+    "getStarted": "Get Started Free",
+    "edit": "Edit",
+    "views": "views",
+    "aboutAuthor": "About the author",
+    "footer": "© 2025 CodeShare. Built with Next.js & TailwindCSS"
+  },
+  "home": {
+    "empty": "No snippets yet. Be the first to share!"
+  },
+  "auth": {
+    "welcomeBack": "Welcome back",
+    "enterCredentials": "Enter your credentials to sign in",
+    "createAccount": "Create an account",
+    "joinCommunity": "Join the developer community",
+    "name": "Name",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "creatingAccount": "Creating account...",
+    "signingIn": "Signing in...",
+    "onlyLettersNumbers": "Only letters, numbers, underscore and hyphen",
+    "passwordPlaceholder": "Create a strong password (min 6 characters)",
+    "enterPassword": "Enter your password",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?"
+  },
+  "profile": {
+    "topLanguages": "Top Languages",
+    "yourSnippets": "Your Snippets",
+    "publicSnippets": "Public Snippets",
+    "privateSnippets": "Private Snippets",
+    "youHaventCreated": "You haven't created any snippets yet",
+    "noSnippets": "No snippets yet",
+    "createFirst": "Create Your First Snippet"
+  }
+}
