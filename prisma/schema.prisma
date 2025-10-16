@@ -13,19 +13,25 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  password  String
-  name      String?
-  username  String    @unique
-  bio       String?
-  avatar    String?
-  snippets  Snippet[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id               String    @id @default(cuid())
+  email            String    @unique
+  password         String
+  name             String?
+  username         String    @unique
+  bio              String?
+  avatar           String?
+  snippets         Snippet[]
+  
+  // Password reset fields
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   @@index([username])
   @@index([email])
+  @@index([resetToken])
 }
 
 model Snippet {

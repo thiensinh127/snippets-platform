@@ -15,7 +15,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsDown, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Option = { label: string; value: string };
@@ -59,7 +59,7 @@ export default function SearchableSelect({
           >
             {selected ? selected.label : placeholder}
           </span>
-          <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+          <ChevronsDown className="ml-2 h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -71,9 +71,9 @@ export default function SearchableSelect({
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
-              {options.map((o) => (
+              {options.map((o, i) => (
                 <CommandItem
-                  key={o.value}
+                  key={o.value + i}
                   value={o.label}
                   onSelect={() => {
                     onChange?.(o.value);

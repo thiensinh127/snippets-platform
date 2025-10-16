@@ -1,34 +1,45 @@
-export const LANGUAGES = [
-  "Text",
-  "JavaScript",
-  "TypeScript",
-  "Python",
-  "Java",
-  "C++",
-  "C#",
-  "Go",
-  "Rust",
-  "PHP",
-  "Ruby",
-  "Swift",
-  "Kotlin",
-  "Dart",
-  "R",
-  "SQL",
-  "HTML",
-  "CSS",
-  "SCSS",
-  "Less",
-  "JSON",
-  "XML",
-  "YAML",
-  "Markdown",
-  "Shell",
-  "Bash",
-  "PowerShell",
-  "Dockerfile",
-  "Other",
-];
+export const LANGUAGES: Record<string, string> = {
+  // 📝 General
+  txt: "Text",
+  md: "Markdown",
+  json: "JSON",
+  yaml: "YAML",
+  xml: "XML",
+
+  // 💻 Web
+  html: "HTML",
+  htm: "HTML",
+  css: "CSS",
+  scss: "SCSS",
+  less: "Less",
+
+  // ⚙️ Programming Languages
+  js: "JavaScript",
+  ts: "TypeScript",
+  py: "Python",
+  java: "Java",
+  c: "C++",
+  cs: "C#",
+  go: "Go",
+  rs: "Rust",
+  php: "PHP",
+  rb: "Ruby",
+  swift: "Swift",
+  kt: "Kotlin",
+  dart: "Dart",
+  r: "R",
+  sql: "SQL",
+
+  // 🐚 Shell & DevOps
+  sh: "Shell",
+  bash: "Bash",
+  ps1: "PowerShell",
+  docker: "Dockerfile",
+
+  // 🔧 Other
+  other: "Other",
+};
+
 export function slugify(s: string) {
   return s
     .toLowerCase()

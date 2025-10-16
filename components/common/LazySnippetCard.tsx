@@ -31,7 +31,6 @@ function SnippetCardSkeleton() {
           </div>
         </div>
       </CardContent>
-      ßß
     </Card>
   );
 }
