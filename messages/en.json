@@ -44,5 +44,19 @@
     "youHaventCreated": "You haven't created any snippets yet",
     "noSnippets": "No snippets yet",
     "createFirst": "Create Your First Snippet"
+  },
+  "editor": {
+    "title": "Code Editor",
+    "formatting": "Formatting...",
+    "formatCode": "Format code",
+    "formatCodeShortcut": "Format code (Shift+Alt+F)",
+    "alignLeft": "Align left",
+    "fullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
+    "syntaxError": "Syntax error in code. Please fix the syntax before formatting.",
+    "formatError": "Unable to format code. Try selecting a different language.",
+    "dismiss": "Dismiss",
+    "loading": "Loading editor...",
+    "fullscreenPlaceholder": "Editor is in fullscreen mode"
   }
 }

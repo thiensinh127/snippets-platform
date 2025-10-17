@@ -1,87 +1,82 @@
 "use client";
 import React from "react";
 import { createPortal } from "react-dom";
-import dynamic from "next/dynamic";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import {
   Maximize2,
   Minimize2,
   AlignLeft,
-  Eye,
-  Code,
-  Settings,
   Wand2,
   AlertCircle,
 } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import CodeMirror from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
+import { html } from "@codemirror/lang-html";
+import { css } from "@codemirror/lang-css";
+import { json } from "@codemirror/lang-json";
+import { python } from "@codemirror/lang-python";
+import { php } from "@codemirror/lang-php";
+import { java } from "@codemirror/lang-java";
+import { cpp } from "@codemirror/lang-cpp";
+import { sql } from "@codemirror/lang-sql";
+import { xml } from "@codemirror/lang-xml";
+import { markdown } from "@codemirror/lang-markdown";
+import { yaml } from "@codemirror/lang-yaml";
+import { rust } from "@codemirror/lang-rust";
+import { oneDark } from "@codemirror/theme-one-dark";
+import { EditorView } from "@codemirror/view";
 
-const SyntaxHighlighter = dynamic(
-  () => import("react-syntax-highlighter").then((mod) => mod.Prism),
-  { ssr: false }
-);
-
-// Import specific themes
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { nightOwl } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { nord } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { okaidia } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { dracula } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { synthwave84 } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { hopscotch } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { pojoaque } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { xonokai } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { cb } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { darcula } from "react-syntax-highlighter/dist/cjs/styles/prism";
-
-const THEME_MAP = {
-  vscDarkPlus,
-  materialDark,
-  oneDark,
-  oneLight,
-  nightOwl,
-  nord,
-  okaidia,
-  dracula,
-  synthwave84,
-  atomDark,
-  ghcolors,
-  hopscotch,
-  pojoaque,
-  xonokai,
-  cb,
-  darcula,
-} as const;
-
-const AVAILABLE_THEMES = [
-  { value: "vscDarkPlus", label: "VS Code Dark" },
-  { value: "materialDark", label: "Material Dark" },
-  { value: "oneDark", label: "One Dark" },
-  { value: "oneLight", label: "One Light" },
-  { value: "nightOwl", label: "Night Owl" },
-  { value: "nord", label: "Nord" },
-  { value: "okaidia", label: "Monokai" },
-  { value: "dracula", label: "Dracula" },
-  { value: "synthwave84", label: "Synthwave 84" },
-  { value: "atomDark", label: "Atom Dark" },
-  { value: "ghcolors", label: "GitHub" },
-  { value: "hopscotch", label: "Hopscotch" },
-  { value: "pojoaque", label: "Pojoaque" },
-  { value: "xonokai", label: "Xonokai" },
-  { value: "cb", label: "Code Blocks" },
-  { value: "darcula", label: "Darcula" },
-] as const;
+// Language mapping for CodeMirror
+const getLanguageExtension = (language: string) => {
+  const lang = language.toLowerCase();
+  switch (lang) {
+    case "javascript":
+    case "js":
+      return javascript({ jsx: false });
+    case "jsx":
+      return javascript({ jsx: true });
+    case "typescript":
+    case "ts":
+      return javascript({ typescript: true, jsx: false });
+    case "tsx":
+      return javascript({ typescript: true, jsx: true });
+    case "html":
+      return html();
+    case "css":
+    case "scss":
+    case "less":
+      return css();
+    case "json":
+      return json();
+    case "python":
+    case "py":
+      return python();
+    case "php":
+      return php();
+    case "java":
+      return java();
+    case "c++":
+    case "cpp":
+    case "c":
+      return cpp();
+    case "sql":
+      return sql();
+    case "xml":
+      return xml();
+    case "markdown":
+    case "md":
+      return markdown();
+    case "yaml":
+    case "yml":
+      return yaml();
+    case "rust":
+    case "rs":
+      return rust();
+    default:
+      return javascript(); // fallback
+  }
+};
 
 export default function SnippetFileEditor({
   value,
@@ -94,10 +89,9 @@ export default function SnippetFileEditor({
   invalid?: boolean;
   language?: string;
 }) {
+  const t = useTranslations("editor");
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
-  const [viewMode, setViewMode] = React.useState<"edit" | "preview">("edit");
-  const [selectedTheme, setSelectedTheme] = React.useState("vscDarkPlus");
   const [isFormatting, setIsFormatting] = React.useState(false);
   const [formatError, setFormatError] = React.useState<string | null>(null);
 
@@ -107,13 +101,10 @@ export default function SnippetFileEditor({
 
   React.useEffect(() => {
     document.body.style.overflow = isFullscreen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isFullscreen]);
-
-  const lines = React.useMemo(
-    () => Math.max(1, value.split("\n").length),
-    [value]
-  );
-  const numbers = Array.from({ length: lines }, (_, i) => i + 1);
 
   const handleAlignLeft = () => {
     const lines = value.split("\n");
@@ -145,8 +136,10 @@ export default function SnippetFileEditor({
       // Map language to prettier parser
       const parserMap: Record<string, string> = {
         javascript: "babel",
-        typescript: "typescript",
+        js: "babel",
         jsx: "babel",
+        typescript: "typescript",
+        ts: "typescript",
         tsx: "typescript",
         json: "json",
         html: "html",
@@ -154,7 +147,9 @@ export default function SnippetFileEditor({
         scss: "scss",
         less: "less",
         markdown: "markdown",
+        md: "markdown",
         yaml: "yaml",
+        yml: "yaml",
         graphql: "graphql",
       };
 
@@ -162,7 +157,7 @@ export default function SnippetFileEditor({
 
       // Get available plugins based on parser
       const plugins = [parserBabel.default, parserEstree.default];
-      if (["typescript", "tsx"].includes(parser)) {
+      if (["typescript", "tsx", "ts"].includes(parser)) {
         plugins.push(parserTypescript.default);
       }
       if (parser === "html") {
@@ -171,7 +166,7 @@ export default function SnippetFileEditor({
       if (["css", "scss", "less"].includes(parser)) {
         plugins.push(parserCss.default);
       }
-      if (parser === "markdown") {
+      if (["markdown", "md"].includes(parser)) {
         plugins.push(parserMarkdown.default);
       }
 
@@ -201,13 +196,9 @@ export default function SnippetFileEditor({
         errorMessage.includes("SyntaxError") ||
         errorMessage.includes("Unexpected token")
       ) {
-        setFormatError(
-          "Syntax error in code. Please fix the syntax before formatting."
-        );
+        setFormatError(t("syntaxError"));
       } else {
-        setFormatError(
-          "Unable to format code. Try selecting a different language."
-        );
+        setFormatError(t("formatError"));
       }
 
       // Try fallback formatting only for JSON
@@ -227,12 +218,10 @@ export default function SnippetFileEditor({
         setTimeout(() => setFormatError(null), 5000);
       }
     }
-  }, [value, language, onChange, isFormatting, formatError]);
+  }, [value, language, onChange, isFormatting, formatError, t]);
 
   // Keyboard shortcut for formatting (Shift+Alt+F like VSCode)
   React.useEffect(() => {
-    if (viewMode !== "edit") return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.shiftKey && e.altKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
@@ -242,12 +231,16 @@ export default function SnippetFileEditor({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [viewMode, handleFormatCode]);
+  }, [handleFormatCode]);
 
-  const getThemeStyle = () => {
-    const themeKey = selectedTheme as keyof typeof THEME_MAP;
-    return THEME_MAP[themeKey] || THEME_MAP.vscDarkPlus;
-  };
+  const languageExtension = React.useMemo(
+    () => getLanguageExtension(language),
+    [language]
+  );
+
+  const extensions = React.useMemo(() => {
+    return [languageExtension, EditorView.lineWrapping];
+  }, [languageExtension]);
 
   const renderEditor = () => {
     return (
@@ -262,111 +255,64 @@ export default function SnippetFileEditor({
         {/* Toolbar */}
         <div className="flex flex-col">
           <div className="flex justify-between items-center gap-2 p-2 border-b bg-muted/40">
-            {/* Left side - View Mode Toggles */}
-            <div className="flex items-center gap-1 bg-background/50 rounded-md p-1">
-              <button
-                onClick={() => setViewMode("edit")}
-                className={cn(
-                  "px-3 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1.5",
-                  viewMode === "edit"
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
-                )}
-                title="Edit mode"
-              >
-                <Code className="w-3.5 h-3.5" />
-                Edit
-              </button>
-              <button
-                onClick={() => setViewMode("preview")}
-                className={cn(
-                  "px-3 py-1 rounded text-xs font-medium transition-colors flex items-center gap-1.5",
-                  viewMode === "preview"
-                    ? "bg-primary text-primary-foreground"
-                    : "hover:bg-muted"
-                )}
-                title="Preview mode"
-              >
-                <Eye className="w-3.5 h-3.5" />
-                Preview
-              </button>
+            {/* Left side - Title */}
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              {t("title")}
             </div>
 
             {/* Right side - Actions */}
             <div className="flex items-center gap-2">
-              {/* Theme Selector - only show in preview mode */}
-              {viewMode === "preview" && (
-                <div className="flex items-center gap-2">
-                  <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-                  <Select
-                    value={selectedTheme}
-                    onValueChange={setSelectedTheme}
-                  >
-                    <SelectTrigger className="h-8 w-[140px] text-xs">
-                      <SelectValue placeholder="Select theme" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {AVAILABLE_THEMES.map((theme) => (
-                        <SelectItem key={theme.value} value={theme.value}>
-                          {theme.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Format Code - only show in edit mode */}
-              {viewMode === "edit" && (
-                <button
-                  onClick={handleFormatCode}
-                  disabled={isFormatting || !value.trim()}
+              {/* Format Code */}
+              <button
+                type="button"
+                onClick={handleFormatCode}
+                disabled={isFormatting || !value.trim()}
+                className={cn(
+                  "p-2 hover:bg-muted rounded-md transition-all relative group",
+                  isFormatting && "animate-pulse"
+                )}
+                title={t("formatCodeShortcut")}
+              >
+                <Wand2
                   className={cn(
-                    "p-2 hover:bg-muted rounded-md transition-all relative group",
-                    isFormatting && "animate-pulse"
+                    "w-4 h-4",
+                    isFormatting && "text-blue-500",
+                    !value.trim() && "text-muted-foreground/50"
                   )}
-                  title="Format code (Shift+Alt+F)"
-                >
-                  <Wand2
-                    className={cn(
-                      "w-4 h-4",
-                      isFormatting && "text-blue-500",
-                      !value.trim() && "text-muted-foreground/50"
-                    )}
-                  />
-                  {isFormatting && (
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded whitespace-nowrap">
-                      Formatting...
-                    </span>
-                  )}
-                </button>
-              )}
+                />
+                {isFormatting && (
+                  <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-xs bg-primary text-primary-foreground px-2 py-1 rounded whitespace-nowrap">
+                    {t("formatting")}
+                  </span>
+                )}
+              </button>
 
-              {/* Align Left - only show in edit mode */}
-              {viewMode === "edit" && (
-                <button
-                  onClick={handleAlignLeft}
-                  className="p-2 hover:bg-muted rounded-md"
-                  title="Align left"
-                >
-                  <AlignLeft className="w-4 h-4" />
-                </button>
-              )}
+              {/* Align Left */}
+              <button
+                type="button"
+                onClick={handleAlignLeft}
+                className="p-2 hover:bg-muted rounded-md"
+                title={t("alignLeft")}
+              >
+                <AlignLeft className="w-4 h-4" />
+              </button>
 
               {/* Fullscreen Toggle */}
               {!isFullscreen ? (
                 <button
+                  type="button"
                   onClick={() => setIsFullscreen(true)}
                   className="p-2 hover:bg-muted rounded-md"
-                  title="Fullscreen"
+                  title={t("fullscreen")}
                 >
                   <Maximize2 className="w-4 h-4" />
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={() => setIsFullscreen(false)}
                   className="p-2 hover:bg-muted rounded-md"
-                  title="Exit fullscreen"
+                  title={t("exitFullscreen")}
                 >
                   <Minimize2 className="w-4 h-4" />
                 </button>
@@ -382,9 +328,10 @@ export default function SnippetFileEditor({
                 {formatError}
               </p>
               <button
+                type="button"
                 onClick={() => setFormatError(null)}
                 className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
-                aria-label="Dismiss"
+                aria-label={t("dismiss")}
               >
                 <svg
                   className="w-4 h-4"
@@ -404,61 +351,47 @@ export default function SnippetFileEditor({
           )}
         </div>
 
-        {/* Editor Content */}
-        {viewMode === "edit" ? (
-          <div className="relative grid grid-cols-[56px_1fr] flex-1 overflow-hidden">
-            {/* Line numbers */}
-            <div className="bg-muted/60 text-muted-foreground text-xs select-none p-3 pr-0 leading-5 overflow-y-auto">
-              <div className="tabular-nums">
-                {numbers.map((n) => (
-                  <div key={n} className="h-5">
-                    {n}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Textarea */}
-            <Textarea
+        {/* CodeMirror Editor */}
+        {mounted ? (
+          <div className="flex-1 overflow-auto">
+            <CodeMirror
               value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder="Paste your code here"
-              className={cn(
-                "border-0 rounded-none font-mono text-sm focus-visible:ring-0 h-full",
-                isFullscreen ? "resize-none" : "min-h-[260px] resize-y"
-              )}
+              height={isFullscreen ? "calc(100vh - 49px)" : "400px"}
+              theme={oneDark}
+              extensions={extensions}
+              onChange={(value) => onChange(value)}
+              basicSetup={{
+                lineNumbers: true,
+                highlightActiveLineGutter: true,
+                highlightSpecialChars: true,
+                history: true,
+                foldGutter: true,
+                drawSelection: true,
+                dropCursor: true,
+                allowMultipleSelections: true,
+                indentOnInput: true,
+                syntaxHighlighting: true,
+                bracketMatching: true,
+                closeBrackets: true,
+                autocompletion: true,
+                rectangularSelection: true,
+                crosshairCursor: true,
+                highlightActiveLine: true,
+                highlightSelectionMatches: true,
+                closeBracketsKeymap: true,
+                defaultKeymap: true,
+                searchKeymap: true,
+                historyKeymap: true,
+                foldKeymap: true,
+                completionKeymap: true,
+                lintKeymap: true,
+              }}
+              className={cn("codemirror-wrapper", isFullscreen && "h-full")}
             />
           </div>
         ) : (
-          /* Preview Mode */
-          <div className="flex-1 overflow-auto bg-slate-950">
-            {mounted && value ? (
-              <SyntaxHighlighter
-                language={language.toLowerCase()}
-                style={getThemeStyle()}
-                showLineNumbers
-                wrapLongLines
-                customStyle={{
-                  margin: 0,
-                  padding: "1rem",
-                  background: "transparent",
-                  fontSize: "0.875rem",
-                  height: "100%",
-                }}
-                lineNumberStyle={{
-                  minWidth: "3em",
-                  paddingRight: "1em",
-                  color: "#6b7280",
-                  userSelect: "none",
-                }}
-              >
-                {value}
-              </SyntaxHighlighter>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p className="text-sm">No code to preview</p>
-              </div>
-            )}
+          <div className="flex-1 flex items-center justify-center bg-muted/20">
+            <p className="text-sm text-muted-foreground">{t("loading")}</p>
           </div>
         )}
       </div>
@@ -468,14 +401,12 @@ export default function SnippetFileEditor({
   if (isFullscreen && mounted) {
     return (
       <>
-        {/* Placeholder khi fullscreen */}
-        <div className="relative border rounded-md overflow-hidden bg-muted/20 min-h-[260px] flex items-center justify-center">
+        <div className="relative border rounded-md overflow-hidden bg-muted/20 min-h-[400px] flex items-center justify-center">
           <p className="text-sm text-muted-foreground">
-            Editor đang ở chế độ fullscreen
+            {t("fullscreenPlaceholder")}
           </p>
         </div>
 
-        {/* Render fullscreen editor qua portal */}
         {createPortal(
           <div className="fixed inset-0 z-[9999] bg-background">
             {renderEditor()}

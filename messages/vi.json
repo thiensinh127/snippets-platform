@@ -43,5 +43,19 @@
     "youHaventCreated": "Bạn chưa tạo snippet nào",
     "noSnippets": "Chưa có snippet nào",
     "createFirst": "Tạo snippet đầu tiên"
+  },
+  "editor": {
+    "title": "Trình soạn thảo Code",
+    "formatting": "Đang format...",
+    "formatCode": "Format code",
+    "formatCodeShortcut": "Format code (Shift+Alt+F)",
+    "alignLeft": "Căn trái",
+    "fullscreen": "Toàn màn hình",
+    "exitFullscreen": "Thoát toàn màn hình",
+    "syntaxError": "Lỗi cú pháp trong code. Vui lòng sửa cú pháp trước khi format.",
+    "formatError": "Không thể format code. Hãy thử chọn ngôn ngữ khác.",
+    "dismiss": "Đóng",
+    "loading": "Đang tải editor...",
+    "fullscreenPlaceholder": "Editor đang ở chế độ toàn màn hình"
   }
 }

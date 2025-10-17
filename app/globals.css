@@ -163,3 +163,43 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* CodeMirror custom styles */
+.codemirror-wrapper {
+  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.codemirror-wrapper .cm-editor {
+  outline: none !important;
+  border: none !important;
+}
+
+.codemirror-wrapper .cm-scroller {
+  font-family: inherit;
+  overflow: auto;
+}
+
+.codemirror-wrapper .cm-content {
+  padding: 8px 0;
+}
+
+.codemirror-wrapper .cm-line {
+  padding: 0 8px;
+}
+
+.codemirror-wrapper .cm-gutters {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  color: #858585;
+  user-select: none;
+}
+
+.codemirror-wrapper .cm-activeLineGutter {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.codemirror-wrapper .cm-activeLine {
+  background-color: rgba(255, 255, 255, 0.03);
+}

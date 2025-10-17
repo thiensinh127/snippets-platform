@@ -48,7 +48,7 @@ export default function SearchableSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn("w-[150px] justify-between", className)}
           disabled={disabled}
         >
           <span
