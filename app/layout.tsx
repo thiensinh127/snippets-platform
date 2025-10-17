@@ -102,10 +102,8 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  modal,
 }: Readonly<{
   children: React.ReactNode;
-  modal: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
   const cookieLocale = cookieStore.get("NEXT_LOCALE")?.value;
@@ -129,10 +127,7 @@ export default async function RootLayout({
               {/* Global Header */}
               <SiteHeader />
               {/* Page Content */}
-              <main className="flex-1">
-                {children}
-                {modal}
-              </main>
+              <main className="flex-1">{children}</main>
               {/* Global Footer */}
               <SiteFooter />
             </div>

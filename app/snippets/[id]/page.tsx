@@ -1,21 +1,20 @@
-import CopyButton from "@/components/common/CopyButton";
 import DeleteButton from "@/components/common/DeleteButton";
 import ShareButton from "@/components/common/ShareButton";
 import StructuredData from "@/components/seo/StructuredData";
+import SnippetCodeViewer from "@/components/snippets/SnippetCodeViewer";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/lib/auth";
 import { getCachedSnippet } from "@/lib/cache";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, Clock, Edit, Eye } from "lucide-react";
+import { ArrowLeft, Clock, Edit, Eye, Globe, Lock } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export async function generateMetadata({
   params,
@@ -93,17 +92,18 @@ export default async function SnippetPage({
   return (
     <>
       <StructuredData type="article" data={snippet} />
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
-        <main className="container mx-auto max-w-5xl px-4 py-8">
-          {/* Top actions */}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        <main className="container mx-auto max-w-6xl px-4 py-6 md:py-8">
+          {/* Header: Back + Actions */}
           <div className="mb-6 flex items-center justify-between">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="h-4 w-4" />
-              {t("common.back")}
+              <span className="hidden sm:inline">{t("common.back")}</span>
             </Link>
+
             <div className="flex items-center gap-2">
               <ShareButton snippetId={snippet.id} title={snippet.title} />
               {isAuthor && (
@@ -111,7 +111,9 @@ export default async function SnippetPage({
                   <Link href={`/snippets/${snippet.id}/edit`}>
                     <Button variant="outline" size="sm">
                       <Edit className="mr-2 h-4 w-4" />
-                      {t("common.edit")}
+                      <span className="hidden sm:inline">
+                        {t("common.edit")}
+                      </span>
                     </Button>
                   </Link>
                   <DeleteButton snippetId={snippet.id} />
@@ -119,138 +121,152 @@ export default async function SnippetPage({
               )}
             </div>
           </div>
-          {/* Title + meta */}
-          <div className="mb-6">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="text-sm">
-                {snippet.language}
-              </Badge>
-              {snippet.complexity && (
-                <Badge variant="outline" className="text-sm">
-                  {snippet.complexity}
-                </Badge>
-              )}
+
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left Column: Code Viewer (2/3 width on large screens) */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Title Card */}
+              <Card className="border-2">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    {/* Badges */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge
+                        variant="secondary"
+                        className="text-sm font-medium"
+                      >
+                        {snippet.language}
+                      </Badge>
+                      {snippet.complexity && (
+                        <Badge variant="outline" className="text-sm">
+                          {snippet.complexity}
+                        </Badge>
+                      )}
+                      <Badge
+                        variant={snippet.isPublic ? "default" : "secondary"}
+                        className="text-sm flex items-center gap-1"
+                      >
+                        {snippet.isPublic ? (
+                          <>
+                            <Globe className="h-3 w-3" />
+                            Public
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="h-3 w-3" />
+                            Private
+                          </>
+                        )}
+                      </Badge>
+                    </div>
+
+                    {/* Title */}
+                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
+                      {snippet.title}
+                    </h1>
+
+                    {/* Description */}
+                    {snippet.description && (
+                      <p className="text-base text-muted-foreground leading-relaxed">
+                        {snippet.description}
+                      </p>
+                    )}
+
+                    {/* Tags */}
+                    {snippet.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {snippet.tags.map((t) => (
+                          <Link key={t.slug} href={`/t/${t.slug}`}>
+                            <Badge
+                              variant="outline"
+                              className="cursor-pointer hover:bg-secondary transition-colors"
+                            >
+                              #{t.name}
+                            </Badge>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Code Viewer */}
+              <SnippetCodeViewer
+                code={snippet.code}
+                language={snippet.language}
+                fileName={snippet.fileName || undefined}
+                slug={snippet.slug}
+              />
             </div>
 
-            <h1 className="mb-2 text-3xl font-bold leading-tight md:text-4xl">
-              {snippet.title}
-            </h1>
+            {/* Right Column: Metadata & Author (1/3 width on large screens) */}
+            <div className="space-y-6">
+              {/* Stats Card */}
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
+                    Statistics
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Eye className="h-4 w-4" />
+                        <span>Views</span>
+                      </div>
+                      <span className="font-semibold">{snippet.views}</span>
+                    </div>
 
-            {snippet.description && (
-              <p className="mb-4 max-w-3xl text-base text-muted-foreground">
-                {snippet.description}
-              </p>
-            )}
+                    <Separator />
 
-            {/* Tags */}
-            {snippet.tags.length > 0 && (
-              <div className="mb-4 flex flex-wrap gap-2">
-                {snippet.tags.map((t) => (
-                  <Link key={t.slug} href={`/t/${t.slug}`}>
-                    <Badge
-                      variant="outline"
-                      className="cursor-pointer hover:bg-secondary"
-                    >
-                      {t.name}
-                    </Badge>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span>Created</span>
+                      </div>
+                      <span className="text-sm font-medium">
+                        {formatDistanceToNow(new Date(snippet.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Author Card */}
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
+                    Author
+                  </h3>
+                  <Link
+                    href={`/profile/${snippet.author.username}`}
+                    className="flex items-start gap-3 rounded-lg p-3 -m-3 transition-colors hover:bg-muted/50"
+                  >
+                    <Avatar className="h-12 w-12 border-2">
+                      <AvatarFallback className="text-lg font-semibold">
+                        {(
+                          snippet.author.name?.[0] ||
+                          snippet.author.username[0] ||
+                          "U"
+                        ).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold truncate">
+                        {snippet.author.name || snippet.author.username}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        @{snippet.author.username}
+                      </div>
+                    </div>
                   </Link>
-                ))}
-              </div>
-            )}
-
-            {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <Link
-                href={`/profile/${snippet.author.username}`}
-                className="flex items-center gap-2 hover:text-foreground"
-              >
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>
-                    {(
-                      snippet.author.name?.[0] ||
-                      snippet.author.username[0] ||
-                      "U"
-                    ).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="font-medium">@{snippet.author.username}</span>
-              </Link>
-
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-4 w-4" />
-                {snippet.views} {t("common.views")}
-              </span>
-
-              <span className="inline-flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {formatDistanceToNow(new Date(snippet.createdAt), {
-                  addSuffix: true,
-                })}
-              </span>
+                </CardContent>
+              </Card>
             </div>
           </div>
-
-          {/* Code block */}
-          <Card className="overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between gap-3 border-b py-3">
-              <div className="truncate text-sm text-muted-foreground">
-                {snippet.fileName ||
-                  `${snippet.slug}.${snippet.language.toLowerCase()}`}
-              </div>
-              <div className="flex items-center gap-2">
-                <CopyButton text={snippet.code} />
-                <ShareButton snippetId={snippet.id} title={snippet.title} />
-              </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <SyntaxHighlighter
-                language={snippet.language.toLowerCase()}
-                style={vscDarkPlus}
-                customStyle={{
-                  margin: 0,
-                  borderRadius: "0.5rem",
-                  fontSize: "0.9rem",
-                }}
-                showLineNumbers
-                wrapLongLines
-              >
-                {snippet.code}
-              </SyntaxHighlighter>
-            </CardContent>
-          </Card>
-
-          {/* Author card */}
-          <Card className="mt-6">
-            <CardHeader className="pb-4">
-              <h2 className="text-xl font-semibold">
-                {t("common.aboutAuthor")}
-              </h2>
-            </CardHeader>
-            <CardContent>
-              <Link
-                href={`/profile/${snippet.author.username}`}
-                className="flex items-start gap-4 rounded-lg p-3 transition-colors hover:bg-muted/50"
-              >
-                <Avatar className="h-14 w-14">
-                  <AvatarFallback className="text-xl">
-                    {(
-                      snippet.author.name?.[0] ||
-                      snippet.author.username[0] ||
-                      "U"
-                    ).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0">
-                  <div className="truncate text-lg font-semibold">
-                    {snippet.author.name || snippet.author.username}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    @{snippet.author.username}
-                  </div>
-                </div>
-              </Link>
-            </CardContent>
-          </Card>
         </main>
       </div>
     </>

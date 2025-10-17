@@ -3,13 +3,22 @@ import { SnippetCard } from "@/components/common/SnippetCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { authOptions } from "@/lib/auth";
 import { getCachedUserWithSnippets } from "@/lib/cache";
 import { prisma } from "@/lib/prisma";
 import { SnippetDTO } from "@/types/snippet";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeft, Calendar, Code2, Edit, Eye } from "lucide-react";
+import {
+  ArrowLeft,
+  Calendar,
+  Code2,
+  Edit,
+  Eye,
+  Lock,
+  TrendingUp,
+} from "lucide-react";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -82,69 +91,75 @@ export default async function ProfilePage({
   });
 
   // Get language stats
-  const languageStats = user.snippets.reduce((acc, snippet) => {
-    acc[snippet.language] = (acc[snippet.language] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const languageStats = user.snippets.reduce(
+    (acc, snippet) => {
+      acc[snippet.language] = (acc[snippet.language] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
 
   const topLanguages = Object.entries(languageStats)
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
+        {/* Back Button */}
         <div className="mb-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
-            {t("common.backHome")}
+            <span className="hidden sm:inline">{t("common.backHome")}</span>
           </Link>
         </div>
-        {/* Profile Header */}
-        <Card className="mb-8">
+
+        {/* Profile Header Card */}
+        <Card className="mb-6 border-2">
           <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row gap-6 items-start">
-              <Avatar className="h-24 w-24">
-                <AvatarFallback className="text-4xl">
+            <div className="flex flex-col sm:flex-row gap-6 items-start">
+              {/* Avatar */}
+              <Avatar className="h-20 w-20 sm:h-24 sm:w-24 border-4 border-primary/20">
+                <AvatarFallback className="text-3xl sm:text-4xl font-bold bg-gradient-to-br from-primary to-primary/60">
                   {user.name?.[0] || user.username[0]}
                 </AvatarFallback>
               </Avatar>
 
-              <div className="flex-1">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <h1 className="text-3xl font-bold">
+              {/* User Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div className="min-w-0">
+                    <h1 className="text-2xl sm:text-3xl font-bold truncate">
                       {user.name || user.username}
                     </h1>
                     <p className="text-muted-foreground">@{user.username}</p>
                   </div>
                   {isOwnProfile && (
-                    <Button variant="outline" size="sm">
-                      <Edit className="h-4 w-4 mr-2" />
-                      {t("common.edit")}
+                    <Button variant="outline" size="sm" className="shrink-0">
+                      <Edit className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">
+                        {t("common.edit")}
+                      </span>
                     </Button>
                   )}
                 </div>
 
-                {user.bio && <p className="text-lg mb-4">{user.bio}</p>}
+                {user.bio && (
+                  <p className="text-base sm:text-lg text-muted-foreground mb-4">
+                    {user.bio}
+                  </p>
+                )}
 
-                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
+                <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>
+                    Joined{" "}
                     {formatDistanceToNow(new Date(user.createdAt), {
                       addSuffix: true,
                     })}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Code2 className="h-4 w-4" />
-                    {user.snippets.length} {t("profile.publicSnippets")}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Eye className="h-4 w-4" />
-                    {totalViews} {t("common.views")}
                   </span>
                 </div>
               </div>
@@ -152,17 +167,87 @@ export default async function ProfilePage({
           </CardContent>
         </Card>
 
-        {/* Stats */}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {/* Total Snippets */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+                  <Code2 className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{user.snippets.length}</p>
+                  <p className="text-xs text-muted-foreground">Snippets</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Views */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+                  <Eye className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{totalViews}</p>
+                  <p className="text-xs text-muted-foreground">Views</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Public Snippets */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+                  <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{publicSnippets.length}</p>
+                  <p className="text-xs text-muted-foreground">Public</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Private Snippets (if own profile) */}
+          {isOwnProfile && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+                    <Lock className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">
+                      {privateSnippets.length}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Private</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Top Languages Card */}
         {topLanguages.length > 0 && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>{t("profile.topLanguages")}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-4 uppercase tracking-wide">
+                Top Languages
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {topLanguages.map(([lang, count]) => (
-                  <Badge key={lang} variant="secondary">
-                    {lang} ({count})
+                  <Badge key={lang} variant="secondary" className="text-sm">
+                    {lang}{" "}
+                    <span className="ml-1 text-muted-foreground">
+                      ({count})
+                    </span>
                   </Badge>
                 ))}
               </div>
@@ -170,24 +255,30 @@ export default async function ProfilePage({
           </Card>
         )}
 
-        {/* Snippets */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">
-            {isOwnProfile
-              ? t("profile.yourSnippets")
-              : t("profile.publicSnippets")}
-          </h2>
+        {/* Snippets Section */}
+        <div className="space-y-8">
+          {/* Public Snippets */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold">
+                {isOwnProfile
+                  ? t("profile.yourSnippets")
+                  : t("profile.publicSnippets")}
+              </h2>
+              <Badge variant="outline" className="text-sm">
+                {publicSnippets.length} snippets
+              </Badge>
+            </div>
 
-          {/* Public snippets */}
-          <div className="mb-6">
             {publicSnippets.length === 0 ? (
-              <Card className="p-8 text-center">
+              <Card className="p-12 text-center">
+                <Code2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/50" />
                 <p className="text-muted-foreground">
                   {t("profile.noSnippets")}
                 </p>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {publicSnippets.map((s) => (
                   <SnippetCard
                     key={s.id}
@@ -211,20 +302,22 @@ export default async function ProfilePage({
             )}
           </div>
 
-          {/* Private snippets (only for owner) */}
-          {isOwnProfile && (
-            <div>
-              <h3 className="text-xl font-semibold mb-3">
-                {t("profile.privateSnippets")}
-              </h3>
-              {privateSnippets.length === 0 ? (
-                <Card className="p-8 text-center">
-                  <p className="text-muted-foreground mb-4">
-                    {t("profile.noSnippets")}
-                  </p>
-                </Card>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Private Snippets (only for owner) */}
+          {isOwnProfile && privateSnippets.length > 0 && (
+            <>
+              <Separator />
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <Lock className="h-5 w-5" />
+                    {t("profile.privateSnippets")}
+                  </h3>
+                  <Badge variant="outline" className="text-sm">
+                    {privateSnippets.length} snippets
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {privateSnippets.map((s) => (
                     <SnippetCard
                       key={s.id}
@@ -244,8 +337,8 @@ export default async function ProfilePage({
                     />
                   ))}
                 </div>
-              )}
-            </div>
+              </div>
+            </>
           )}
         </div>
       </div>
