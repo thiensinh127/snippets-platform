@@ -41,19 +41,23 @@ export default function SnippetDetailDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-4xl gap-0 p-0"
+        aria-describedby="snippet-description"
         onPointerDownOutside={(e) => {
           const el = e.target as HTMLElement;
           if (el.closest("pre")) e.preventDefault();
         }}
       >
         <DialogHeader className="px-6 pb-3 pt-4">
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
             <div className="min-w-0">
               <DialogTitle className="line-clamp-2 text-xl leading-snug">
                 {snippet.title}
               </DialogTitle>
               {snippet.description && (
-                <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                <p
+                  id="snippet-description"
+                  className="mt-1 line-clamp-2 text-sm text-muted-foreground"
+                >
                   {snippet.description}
                 </p>
               )}
@@ -66,9 +70,9 @@ export default function SnippetDetailDialog({
                 )}
                 {snippet.tags?.length > 0 && (
                   <div className="ml-1 flex flex-wrap gap-1">
-                    {snippet.tags.slice(0, 5).map((tag) => (
+                    {snippet.tags.slice(0, 5).map((tag, index) => (
                       <Badge
-                        key={tag.id}
+                        key={tag.id + index.toString()}
                         variant="outline"
                         className="text-[11px]"
                       >
@@ -86,7 +90,8 @@ export default function SnippetDetailDialog({
                 size="sm"
                 onClick={() => navigator.clipboard.writeText(snippet.code)}
               >
-                <Copy className="mr-1 h-4 w-4" /> Copy
+                <Copy className="mr-1 h-4 w-4" />{" "}
+                <span className="hidden sm:inline">Copy</span>
               </Button>
               <Link
                 href={`/snippets/${snippet.id}`}
@@ -94,10 +99,15 @@ export default function SnippetDetailDialog({
                 onClick={(e) => e.stopPropagation()}
               >
                 <Button variant="outline" size="sm">
-                  <ExternalLink className="mr-1 h-4 w-4" /> Open
+                  <ExternalLink className="mr-1 h-4 w-4" />
+                  <span className="hidden sm:inline">Open</span>
                 </Button>
               </Link>
-              <ShareButton snippetId={snippet.id} title={snippet.title} />
+              <ShareButton
+                isText={false}
+                snippetId={snippet.id}
+                title={snippet.title}
+              />
             </div>
           </div>
 
@@ -111,10 +121,12 @@ export default function SnippetDetailDialog({
                 {snippet.author.avatarUrl ? (
                   <AvatarImage
                     src={snippet.author.avatarUrl}
-                    alt={snippet.author.username}
+                    alt={`${snippet.author.username}'s avatar`}
                   />
                 ) : null}
-                <AvatarFallback>
+                <AvatarFallback
+                  aria-label={`${snippet.author.username}'s avatar`}
+                >
                   {(
                     snippet.author.name?.[0] ||
                     snippet.author.username[0] ||
@@ -133,8 +145,8 @@ export default function SnippetDetailDialog({
         </DialogHeader>
 
         {/* Body */}
-        <div className="max-h-[70vh] overflow-auto px-6 pb-5">
-          <div className="overflow-hidden rounded-lg border bg-slate-900">
+        <div className="h-[35vh] sm:h-[60vh] md:-[70vh] overflow-auto px-6 pb-5">
+          <div className="overflow-hidden rounded-lg border bg-slate-900 w-full h-full">
             <SyntaxHighlighter
               language={snippet.language.toLowerCase()}
               style={vscDarkPlus}

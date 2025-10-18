@@ -82,6 +82,8 @@ export default function TagMultiSelect({
             variant="outline"
             role="combobox"
             aria-expanded={open}
+            aria-haspopup="listbox"
+            aria-label="Select or create tags"
             className={cn(
               "w-full justify-between gap-2",
               "min-h-10 px-3 py-2",
@@ -146,6 +148,7 @@ export default function TagMultiSelect({
               placeholder="Search or create…"
               value={query}
               onValueChange={setQuery}
+              aria-label="Search or create tags"
             />
             <CommandList>
               <CommandEmpty>
@@ -161,7 +164,7 @@ export default function TagMultiSelect({
               </CommandEmpty>
 
               {!!options.length && (
-                <CommandGroup heading="Available">
+                <CommandGroup heading="Available" role="listbox">
                   {options
                     .filter((o) =>
                       o.label.toLowerCase().includes(query.toLowerCase())

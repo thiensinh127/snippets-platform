@@ -22,9 +22,13 @@ import {
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
-import SnippetFileEditor from "./SnippetFileEditor";
 import TagMultiSelect, { TagOption } from "./TagMultiSelect";
 import SearchableSelect from "../common/SearchableSelect";
+import dynamic from "next/dynamic";
+
+const SnippetFileEditor = dynamic(() => import("./SnippetFileEditor"), {
+  ssr: false,
+});
 
 const schema = z.object({
   title: z.string().min(1).max(100),
@@ -295,10 +299,11 @@ export default function SnippetForm({
               </div>
               <div className="p-6 space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
+                  <label htmlFor="title" className="text-sm font-medium">
                     Title <span className="text-red-500">*</span>
                   </label>
                   <Input
+                    id="title"
                     placeholder="Give your snippet a descriptive title..."
                     {...register("title")}
                     className={cn(
@@ -306,17 +311,24 @@ export default function SnippetForm({
                       errors.title &&
                         "border-red-500 focus-visible:ring-red-500"
                     )}
+                    aria-describedby={errors.title ? "title-error" : undefined}
                   />
                   {errors.title && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
+                    <p
+                      id="title-error"
+                      className="text-sm text-red-600 dark:text-red-400"
+                    >
                       {errors.title.message}
                     </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Description</label>
+                  <label htmlFor="description" className="text-sm font-medium">
+                    Description
+                  </label>
                   <Textarea
+                    id="description"
                     rows={3}
                     placeholder="Add a description to help others understand your snippet..."
                     {...register("description")}
@@ -340,10 +352,14 @@ export default function SnippetForm({
 
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="flex items-center gap-2">
-                      <label className="text-xs font-medium text-muted-foreground">
+                      <label
+                        htmlFor="fileName"
+                        className="text-xs font-medium text-muted-foreground"
+                      >
                         File:
                       </label>
                       <Input
+                        id="fileName"
                         placeholder="example.js"
                         {...register("fileName")}
                         className="h-9 w-48"
@@ -351,7 +367,10 @@ export default function SnippetForm({
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <label className="text-xs font-medium text-muted-foreground">
+                      <label
+                        htmlFor="language"
+                        className="text-xs font-medium text-muted-foreground"
+                      >
                         Language:
                       </label>
                       <SearchableSelect
@@ -415,9 +434,11 @@ export default function SnippetForm({
               {/* Left: Visibility Toggle */}
               <div className="flex items-center gap-3">
                 <Switch
+                  id="isPublic"
                   checked={watch("isPublic") ?? true}
                   onCheckedChange={(v) => setValue("isPublic", v)}
                   className="data-[state=checked]:bg-green-600"
+                  aria-label="Toggle snippet visibility"
                 />
                 <div className="flex items-center gap-2">
                   {watch("isPublic") ? (
@@ -453,6 +474,9 @@ export default function SnippetForm({
                   type="submit"
                   onClick={handleSubmit(onSubmit)}
                   disabled={saving}
+                  aria-label={
+                    mode === "edit" ? "Update snippet" : "Create snippet"
+                  }
                   className="flex-1 sm:flex-none sm:min-w-[120px] bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
                 >
                   {saving ? (

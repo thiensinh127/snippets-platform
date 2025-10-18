@@ -84,7 +84,11 @@ export default function SnippetFeed({
           <LazySnippetCard key={snippet.id} snippet={snippet} />
         ))}
       </div>
-      {error && <div className="mt-4 text-sm text-red-600">{error}</div>}
+      {error && (
+        <div className="mt-4 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
       {hasMore && (
         <div className="mt-6 flex items-center justify-center">
           <Button onClick={loadNext} disabled={loading} variant="outline">

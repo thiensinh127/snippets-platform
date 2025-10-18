@@ -1,17 +1,5 @@
 "use client";
 
-import React from "react";
-import { createPortal } from "react-dom";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  Maximize2,
-  Minimize2,
-  Download,
-  Settings,
-  Copy,
-  Check,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,31 +8,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
+  Check,
+  Copy,
+  Download,
+  Maximize2,
+  Minimize2,
+  Settings,
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import React from "react";
+import { createPortal } from "react-dom";
 
-// Import themes
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { oneDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { nightOwl } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { nord } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { okaidia } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { dracula } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { ghcolors } from "react-syntax-highlighter/dist/cjs/styles/prism";
-
-const THEME_MAP = {
-  vscDarkPlus,
-  materialDark,
-  oneDark,
-  oneLight,
-  nightOwl,
-  nord,
-  okaidia,
-  dracula,
-  atomDark,
-  ghcolors,
-} as const;
+const CodeBlock = dynamic(() => import("@/components/snippets/CodeBlock"), {
+  ssr: false,
+  loading: () => <div className="h-40 bg-gray-100 rounded-md animate-pulse" />,
+});
 
 const AVAILABLE_THEMES = [
   { value: "vscDarkPlus", label: "VS Code Dark" },
@@ -87,11 +67,6 @@ export default function SnippetCodeViewer({
       document.body.style.overflow = "";
     };
   }, [isFullscreen]);
-
-  const getThemeStyle = () => {
-    const themeKey = selectedTheme as keyof typeof THEME_MAP;
-    return THEME_MAP[themeKey] || THEME_MAP.vscDarkPlus;
-  };
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -200,29 +175,11 @@ export default function SnippetCodeViewer({
         </div>
 
         {/* Code Content */}
-        <div className="flex-1 overflow-auto">
-          <SyntaxHighlighter
-            language={language.toLowerCase()}
-            style={getThemeStyle()}
-            showLineNumbers
-            wrapLongLines
-            customStyle={{
-              margin: 0,
-              padding: "1.5rem",
-              background: "transparent",
-              fontSize: "0.875rem",
-              height: "100%",
-            }}
-            lineNumberStyle={{
-              minWidth: "3em",
-              paddingRight: "1em",
-              color: "#64748b",
-              userSelect: "none",
-            }}
-          >
-            {code}
-          </SyntaxHighlighter>
-        </div>
+        <CodeBlock
+          code={code}
+          language={language}
+          selectedTheme={selectedTheme}
+        />
       </div>
     );
   };

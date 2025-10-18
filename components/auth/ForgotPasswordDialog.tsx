@@ -95,7 +95,11 @@ export default function ForgotPasswordDialog({
                 password.
               </p>
             </div>
-            <Button onClick={handleClose} className="w-full">
+            <Button
+              onClick={handleClose}
+              className="w-full"
+              aria-label="Close dialog"
+            >
               Got it
             </Button>
           </div>
@@ -128,6 +132,7 @@ export default function ForgotPasswordDialog({
                 onClick={handleClose}
                 disabled={isLoading}
                 className="flex-1"
+                aria-label="Cancel password reset"
               >
                 Cancel
               </Button>
@@ -135,6 +140,7 @@ export default function ForgotPasswordDialog({
                 type="submit"
                 disabled={isLoading || !email}
                 className="flex-1"
+                aria-label="Send password reset link"
               >
                 {isLoading ? (
                   <>

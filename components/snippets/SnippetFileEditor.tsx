@@ -10,7 +10,6 @@ import {
   Wand2,
   AlertCircle,
 } from "lucide-react";
-import CodeMirror from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
@@ -26,6 +25,11 @@ import { yaml } from "@codemirror/lang-yaml";
 import { rust } from "@codemirror/lang-rust";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView } from "@codemirror/view";
+import dynamic from "next/dynamic";
+
+const SnippetCodeMirror = dynamic(() => import("./SnippetCodeMirror"), {
+  ssr: false,
+});
 
 // Language mapping for CodeMirror
 const getLanguageExtension = (language: string) => {
@@ -268,10 +272,11 @@ export default function SnippetFileEditor({
                 onClick={handleFormatCode}
                 disabled={isFormatting || !value.trim()}
                 className={cn(
-                  "p-2 hover:bg-muted rounded-md transition-all relative group",
+                  "p-2 hover:bg-muted rounded-md transition-all relative group cursor-pointer",
                   isFormatting && "animate-pulse"
                 )}
                 title={t("formatCodeShortcut")}
+                aria-label={t("formatCode")}
               >
                 <Wand2
                   className={cn(
@@ -291,8 +296,9 @@ export default function SnippetFileEditor({
               <button
                 type="button"
                 onClick={handleAlignLeft}
-                className="p-2 hover:bg-muted rounded-md"
+                className="p-2 hover:bg-muted rounded-md cursor-pointer"
                 title={t("alignLeft")}
+                aria-label={t("alignLeft")}
               >
                 <AlignLeft className="w-4 h-4" />
               </button>
@@ -302,8 +308,9 @@ export default function SnippetFileEditor({
                 <button
                   type="button"
                   onClick={() => setIsFullscreen(true)}
-                  className="p-2 hover:bg-muted rounded-md"
+                  className="p-2 hover:bg-muted rounded-md cursor-pointer"
                   title={t("fullscreen")}
+                  aria-label={t("fullscreen")}
                 >
                   <Maximize2 className="w-4 h-4" />
                 </button>
@@ -311,8 +318,9 @@ export default function SnippetFileEditor({
                 <button
                   type="button"
                   onClick={() => setIsFullscreen(false)}
-                  className="p-2 hover:bg-muted rounded-md"
+                  className="p-2 hover:bg-muted rounded-md cursor-pointer"
                   title={t("exitFullscreen")}
+                  aria-label={t("exitFullscreen")}
                 >
                   <Minimize2 className="w-4 h-4" />
                 </button>
@@ -330,8 +338,9 @@ export default function SnippetFileEditor({
               <button
                 type="button"
                 onClick={() => setFormatError(null)}
-                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 cursor-pointer"
                 aria-label={t("dismiss")}
+                title={t("dismiss")}
               >
                 <svg
                   className="w-4 h-4"
@@ -353,42 +362,13 @@ export default function SnippetFileEditor({
 
         {/* CodeMirror Editor */}
         {mounted ? (
-          <div className="flex-1 overflow-auto">
-            <CodeMirror
-              value={value}
-              height={isFullscreen ? "calc(100vh - 49px)" : "400px"}
-              theme={oneDark}
-              extensions={extensions}
-              onChange={(value) => onChange(value)}
-              basicSetup={{
-                lineNumbers: true,
-                highlightActiveLineGutter: true,
-                highlightSpecialChars: true,
-                history: true,
-                foldGutter: true,
-                drawSelection: true,
-                dropCursor: true,
-                allowMultipleSelections: true,
-                indentOnInput: true,
-                syntaxHighlighting: true,
-                bracketMatching: true,
-                closeBrackets: true,
-                autocompletion: true,
-                rectangularSelection: true,
-                crosshairCursor: true,
-                highlightActiveLine: true,
-                highlightSelectionMatches: true,
-                closeBracketsKeymap: true,
-                defaultKeymap: true,
-                searchKeymap: true,
-                historyKeymap: true,
-                foldKeymap: true,
-                completionKeymap: true,
-                lintKeymap: true,
-              }}
-              className={cn("codemirror-wrapper", isFullscreen && "h-full")}
-            />
-          </div>
+          <SnippetCodeMirror
+            value={value}
+            onChange={onChange}
+            extensions={extensions}
+            isFullscreen={isFullscreen}
+            oneDark={oneDark}
+          />
         ) : (
           <div className="flex-1 flex items-center justify-center bg-muted/20">
             <p className="text-sm text-muted-foreground">{t("loading")}</p>

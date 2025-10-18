@@ -100,6 +100,7 @@ export default function LoginPage() {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">{t("auth.password")}</Label>
                   <button
+                    aria-label="Forgot password"
                     type="button"
                     onClick={() => setShowForgotPassword(true)}
                     className="text-xs text-primary hover:underline"
@@ -117,6 +118,7 @@ export default function LoginPage() {
                 />
               </div>
               <Button
+                aria-label="Sign in"
                 type="submit"
                 className="w-full h-11 mt-6"
                 disabled={isLoading}

@@ -1,7 +1,6 @@
 import DeleteButton from "@/components/common/DeleteButton";
 import ShareButton from "@/components/common/ShareButton";
 import StructuredData from "@/components/seo/StructuredData";
-import SnippetCodeViewer from "@/components/snippets/SnippetCodeViewer";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,8 +12,14 @@ import { formatDistanceToNow } from "date-fns";
 import { ArrowLeft, Clock, Edit, Eye, Globe, Lock } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+
+const SnippetCodeViewer = dynamic(
+  () => import("@/components/snippets/SnippetCodeViewer"),
+  {}
+);
 
 export async function generateMetadata({
   params,

@@ -48,6 +48,8 @@ export default function SearchableSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-label="Select language"
           className={cn("w-[150px] justify-between", className)}
           disabled={disabled}
         >
@@ -67,10 +69,10 @@ export default function SearchableSelect({
         align="start"
       >
         <Command>
-          <CommandInput placeholder="Search…" />
+          <CommandInput placeholder="Search…" aria-label="Search languages" />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
-            <CommandGroup>
+            <CommandGroup role="listbox">
               {options.map((o, i) => (
                 <CommandItem
                   key={o.value + i}

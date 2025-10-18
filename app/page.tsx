@@ -37,7 +37,13 @@ export default async function HomePage() {
       <HeroSection session={session} />
 
       {/* Snippets Grid */}
-      <section className="container mx-auto px-4 py-8">
+      <section
+        className="container mx-auto px-4 py-8"
+        aria-labelledby="snippets-heading"
+      >
+        <h2 id="snippets-heading" className="sr-only">
+          Code Snippets
+        </h2>
         {snippets.length === 0 ? (
           <Card className="p-12 text-center">
             <Code2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
