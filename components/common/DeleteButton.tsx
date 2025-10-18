@@ -59,6 +59,7 @@ export default function DeleteButton({
           variant="destructive"
           disabled={isDeleting}
           className="transition-all"
+          aria-label="Delete snippet"
         >
           {isDeleting ? (
             <>
@@ -67,7 +68,7 @@ export default function DeleteButton({
             </>
           ) : (
             <>
-              <Trash2 className={`h-4 w-4 ${isText && "mr-2"}`} />
+              <Trash2 className={`h-4 w-4 text-white ${isText && "mr-2"}`} />
               {isText && "Delete"}
             </>
           )}
@@ -84,11 +85,14 @@ export default function DeleteButton({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting} aria-label="Cancel deletion">
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-destructive text-white hover:bg-destructive/90"
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            aria-label="Confirm deletion"
           >
             {isDeleting ? (
               <>

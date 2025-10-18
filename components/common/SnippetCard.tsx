@@ -49,7 +49,6 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
         : new Date(snippet.createdAt),
     [snippet.createdAt]
   );
-
   const [open, setOpen] = useState(false);
 
   return (
@@ -69,7 +68,8 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
         }}
         role="button"
         tabIndex={0}
-        aria-label={`Open snippet ${snippet.title}`}
+        aria-label={`Open snippet: ${snippet.title}`}
+        aria-describedby={`snippet-${snippet.id}-description`}
       >
         {/* Header */}
         <CardHeader className="pb-2">
@@ -110,11 +110,17 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
             </div>
           </div>
           {snippet.description ? (
-            <CardDescription className="line-clamp-1">
+            <CardDescription
+              id={`snippet-${snippet.id}-description`}
+              className="line-clamp-1"
+            >
               {snippet.description}
             </CardDescription>
           ) : (
-            <CardDescription className="invisible select-none">
+            <CardDescription
+              id={`snippet-${snippet.id}-description`}
+              className="invisible select-none"
+            >
               no-des
             </CardDescription>
           )}
@@ -125,8 +131,12 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
           {/* Tags */}
           <div className="mb-3 min-h-[28px] flex flex-wrap gap-1">
             {snippet.tags && snippet.tags.length > 0 ? (
-              snippet.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="text-[11px]">
+              snippet.tags.slice(0, 3).map((tag, idx) => (
+                <Badge
+                  key={tag.id + idx.toString()}
+                  variant="secondary"
+                  className="text-[11px]"
+                >
                   {tag.name}
                 </Badge>
               ))
@@ -165,7 +175,7 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
           </div>
         </CardContent>
 
-        <CardFooter className="mt-auto border-t bg-background/60 py-2">
+        <CardFooter className="mt-auto border-t bg-background/80 py-2">
           <div className="flex items-center justify-between text-sm text-muted-foreground !w-full">
             <Link
               href={`/profile/${snippet.author.id}`}
@@ -175,11 +185,13 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
               <Avatar className="h-6 w-6">
                 {snippet.author.avatarUrl ? (
                   <AvatarImage
-                    alt={snippet.author.username}
+                    alt={`${snippet.author.username}'s avatar`}
                     src={snippet.author.avatarUrl}
                   />
                 ) : null}
-                <AvatarFallback>
+                <AvatarFallback
+                  aria-label={`${snippet.author.username}'s avatar`}
+                >
                   {(
                     snippet.author.name?.[0] ||
                     snippet.author.username[0] ||

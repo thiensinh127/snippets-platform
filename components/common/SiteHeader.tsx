@@ -13,7 +13,7 @@ export default async function SiteHeader() {
   const t = await getTranslations();
 
   return (
-    <header className="border-b bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
+    <header className="border-b bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Code2 className="h-8 w-8 text-primary" />
