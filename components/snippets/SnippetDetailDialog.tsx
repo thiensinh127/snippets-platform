@@ -13,9 +13,8 @@ import { SnippetDTO } from "@/types/snippet";
 import { formatDistanceToNow } from "date-fns";
 import { Clock, Copy, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { useMemo, useEffect, useState } from "react";
+import { codeToHtml } from "shiki";
 import ShareButton from "../common/ShareButton";
 
 type Props = {
@@ -36,6 +35,43 @@ export default function SnippetDetailDialog({
         : new Date(snippet.createdAt),
     [snippet.createdAt]
   );
+
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
+
+  useEffect(() => {
+    let cancelled = false;
+    const highlightCode = async () => {
+      try {
+        const html = await codeToHtml(snippet.code, {
+          lang: snippet.language.toLowerCase(),
+          theme: "dark-plus",
+        });
+        if (!cancelled) {
+          setHighlightedCode(html);
+        }
+      } catch {
+        if (!cancelled) {
+          setHighlightedCode(
+            `<pre style="padding: 16px; margin: 0;"><code>${snippet.code.replace(
+              /[&<>"']/g,
+              (m) =>
+                ({
+                  "&": "&amp;",
+                  "<": "&lt;",
+                  ">": "&gt;",
+                  '"': "&quot;",
+                  "'": "&#039;",
+                })[m] || m
+            )}</code></pre>`
+          );
+        }
+      }
+    };
+    highlightCode();
+    return () => {
+      cancelled = true;
+    };
+  }, [snippet.code, snippet.language]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -146,22 +182,30 @@ export default function SnippetDetailDialog({
 
         {/* Body */}
         <div className="h-[35vh] sm:h-[60vh] md:-[70vh] overflow-auto px-6 pb-5">
-          <div className="overflow-hidden rounded-lg border bg-slate-900 w-full h-full">
-            <SyntaxHighlighter
-              language={snippet.language.toLowerCase()}
-              style={vscDarkPlus}
-              customStyle={{
-                margin: 0,
-                borderRadius: 0,
-                background: "transparent",
-                fontSize: "13px",
-                padding: "16px",
-              }}
-              wrapLongLines
-            >
-              {snippet.code}
-            </SyntaxHighlighter>
+          <div className="rounded-lg border bg-slate-900 w-full h-full overflow-auto">
+            {highlightedCode ? (
+              <div
+                className="shiki-dialog-code"
+                dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                style={{ fontSize: "13px" }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                Loading...
+              </div>
+            )}
           </div>
+          <style jsx global>{`
+            .shiki-dialog-code pre {
+              margin: 0;
+              padding: 1px;
+              background: transparent !important;
+            }
+            .shiki-dialog-code code {
+              font-size: 13px;
+              line-height: 1.6;
+            }
+          `}</style>
         </div>
       </DialogContent>
     </Dialog>

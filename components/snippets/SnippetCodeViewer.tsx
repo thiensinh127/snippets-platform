@@ -35,7 +35,6 @@ const AVAILABLE_THEMES = [
   { value: "nord", label: "Nord" },
   { value: "okaidia", label: "Monokai" },
   { value: "dracula", label: "Dracula" },
-  { value: "atomDark", label: "Atom Dark" },
   { value: "ghcolors", label: "GitHub" },
 ] as const;
 
@@ -111,7 +110,7 @@ export default function SnippetCodeViewer({
             <div className="flex items-center gap-2 mr-2">
               <Settings className="w-3.5 h-3.5 text-slate-400" />
               <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-                <SelectTrigger className="h-8 w-[120px] text-xs border-slate-700 bg-slate-800/50">
+                <SelectTrigger className="h-8 w-[120px] text-slate-400 text-xs border-slate-700 bg-slate-800/50">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

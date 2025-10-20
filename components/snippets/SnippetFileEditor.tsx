@@ -10,75 +10,73 @@ import {
   Wand2,
   AlertCircle,
 } from "lucide-react";
-import { javascript } from "@codemirror/lang-javascript";
-import { html } from "@codemirror/lang-html";
-import { css } from "@codemirror/lang-css";
-import { json } from "@codemirror/lang-json";
-import { python } from "@codemirror/lang-python";
-import { php } from "@codemirror/lang-php";
-import { java } from "@codemirror/lang-java";
-import { cpp } from "@codemirror/lang-cpp";
-import { sql } from "@codemirror/lang-sql";
-import { xml } from "@codemirror/lang-xml";
-import { markdown } from "@codemirror/lang-markdown";
-import { yaml } from "@codemirror/lang-yaml";
-import { rust } from "@codemirror/lang-rust";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView } from "@codemirror/view";
 import dynamic from "next/dynamic";
+import type { Extension } from "@codemirror/state";
 
 const SnippetCodeMirror = dynamic(() => import("./SnippetCodeMirror"), {
   ssr: false,
 });
 
-// Language mapping for CodeMirror
-const getLanguageExtension = (language: string) => {
+// Language mapping for CodeMirror with dynamic imports
+const getLanguageExtension = async (language: string): Promise<Extension> => {
   const lang = language.toLowerCase();
   switch (lang) {
     case "javascript":
     case "js":
-      return javascript({ jsx: false });
+      return (await import("@codemirror/lang-javascript")).javascript({
+        jsx: false,
+      });
     case "jsx":
-      return javascript({ jsx: true });
+      return (await import("@codemirror/lang-javascript")).javascript({
+        jsx: true,
+      });
     case "typescript":
     case "ts":
-      return javascript({ typescript: true, jsx: false });
+      return (await import("@codemirror/lang-javascript")).javascript({
+        typescript: true,
+        jsx: false,
+      });
     case "tsx":
-      return javascript({ typescript: true, jsx: true });
+      return (await import("@codemirror/lang-javascript")).javascript({
+        typescript: true,
+        jsx: true,
+      });
     case "html":
-      return html();
+      return (await import("@codemirror/lang-html")).html();
     case "css":
     case "scss":
     case "less":
-      return css();
+      return (await import("@codemirror/lang-css")).css();
     case "json":
-      return json();
+      return (await import("@codemirror/lang-json")).json();
     case "python":
     case "py":
-      return python();
+      return (await import("@codemirror/lang-python")).python();
     case "php":
-      return php();
+      return (await import("@codemirror/lang-php")).php();
     case "java":
-      return java();
+      return (await import("@codemirror/lang-java")).java();
     case "c++":
     case "cpp":
     case "c":
-      return cpp();
+      return (await import("@codemirror/lang-cpp")).cpp();
     case "sql":
-      return sql();
+      return (await import("@codemirror/lang-sql")).sql();
     case "xml":
-      return xml();
+      return (await import("@codemirror/lang-xml")).xml();
     case "markdown":
     case "md":
-      return markdown();
+      return (await import("@codemirror/lang-markdown")).markdown();
     case "yaml":
     case "yml":
-      return yaml();
+      return (await import("@codemirror/lang-yaml")).yaml();
     case "rust":
     case "rs":
-      return rust();
+      return (await import("@codemirror/lang-rust")).rust();
     default:
-      return javascript(); // fallback
+      return (await import("@codemirror/lang-javascript")).javascript(); // fallback
   }
 };
 
@@ -128,15 +126,6 @@ export default function SnippetFileEditor({
     setFormatError(null);
 
     try {
-      // Dynamically import prettier
-      const prettier = await import("prettier/standalone");
-      const parserBabel = await import("prettier/plugins/babel");
-      const parserEstree = await import("prettier/plugins/estree");
-      const parserTypescript = await import("prettier/plugins/typescript");
-      const parserHtml = await import("prettier/plugins/html");
-      const parserCss = await import("prettier/plugins/postcss");
-      const parserMarkdown = await import("prettier/plugins/markdown");
-
       // Map language to prettier parser
       const parserMap: Record<string, string> = {
         javascript: "babel",
@@ -159,18 +148,38 @@ export default function SnippetFileEditor({
 
       const parser = parserMap[language.toLowerCase()] || "babel";
 
-      // Get available plugins based on parser
-      const plugins = [parserBabel.default, parserEstree.default];
-      if (["typescript", "tsx", "ts"].includes(parser)) {
-        plugins.push(parserTypescript.default);
-      }
-      if (parser === "html") {
+      // Dynamically import prettier and only the needed plugins
+      const prettier = await import("prettier/standalone");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const plugins: any[] = [];
+
+      if (["babel", "json", "javascript", "js", "jsx"].includes(parser)) {
+        const [parserBabel, parserEstree] = await Promise.all([
+          import("prettier/plugins/babel"),
+          import("prettier/plugins/estree"),
+        ]);
+        plugins.push(parserBabel.default, parserEstree.default);
+      } else if (["typescript", "tsx", "ts"].includes(parser)) {
+        const [parserBabel, parserEstree, parserTypescript] = await Promise.all(
+          [
+            import("prettier/plugins/babel"),
+            import("prettier/plugins/estree"),
+            import("prettier/plugins/typescript"),
+          ]
+        );
+        plugins.push(
+          parserBabel.default,
+          parserEstree.default,
+          parserTypescript.default
+        );
+      } else if (parser === "html") {
+        const parserHtml = await import("prettier/plugins/html");
         plugins.push(parserHtml.default);
-      }
-      if (["css", "scss", "less"].includes(parser)) {
+      } else if (["css", "scss", "less"].includes(parser)) {
+        const parserCss = await import("prettier/plugins/postcss");
         plugins.push(parserCss.default);
-      }
-      if (["markdown", "md"].includes(parser)) {
+      } else if (["markdown", "md"].includes(parser)) {
+        const parserMarkdown = await import("prettier/plugins/markdown");
         plugins.push(parserMarkdown.default);
       }
 
@@ -237,13 +246,25 @@ export default function SnippetFileEditor({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleFormatCode]);
 
-  const languageExtension = React.useMemo(
-    () => getLanguageExtension(language),
-    [language]
-  );
+  const [languageExtension, setLanguageExtension] =
+    React.useState<Extension | null>(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    getLanguageExtension(language).then((ext) => {
+      if (!cancelled) {
+        setLanguageExtension(ext);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [language]);
 
   const extensions = React.useMemo(() => {
-    return [languageExtension, EditorView.lineWrapping];
+    return languageExtension
+      ? [languageExtension, EditorView.lineWrapping]
+      : [EditorView.lineWrapping];
   }, [languageExtension]);
 
   const renderEditor = () => {

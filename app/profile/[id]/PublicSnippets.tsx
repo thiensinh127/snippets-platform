@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Code2 } from "lucide-react";
+import { Code2, Edit } from "lucide-react";
 import { SnippetCard } from "@/components/common/SnippetCard";
 import { getTranslations } from "next-intl/server";
 
@@ -11,6 +11,10 @@ import { Tags } from "@/types/snippet";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import DeleteButton from "@/components/common/DeleteButton";
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 export default async function PublicSnippetsSection({
   userId,
@@ -108,14 +112,30 @@ export default async function PublicSnippetsSection({
                 compact
                 actions={
                   isOwn ? (
-                    <div className="flex items-center gap-2">
-                      <Link href={`/snippets/${s.id}/edit`}>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                      </Link>
-                      <DeleteButton isText={false} snippetId={s.id} />
-                    </div>
+                    <>
+                      <DropdownMenuItem
+                        asChild
+                        className="w-full cursor-pointer"
+                      >
+                        <Link
+                          className="w-full flex items-center justify-center gap-2 hover:bg-gray-100"
+                          href={`/snippets/${s.id}/edit`}
+                        >
+                          <Edit className="text-blue-500 h-4 w-4 mr-3" />
+
+                          <span className="font-medium">
+                            {t("common.edit")}
+                          </span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        asChild
+                        className="w-full cursor-pointer"
+                      >
+                        <DeleteButton snippetId={s.id} />
+                      </DropdownMenuItem>
+                    </>
                   ) : undefined
                 }
               />

@@ -20,9 +20,19 @@ import { toast } from "sonner";
 export default function DeleteButton({
   snippetId,
   isText = true,
+  className,
+  variant = "ghost",
 }: {
   snippetId: string;
   isText?: boolean;
+  className?: string;
+  variant?:
+    | "ghost"
+    | "destructive"
+    | "link"
+    | "outline"
+    | "secondary"
+    | "default";
 }) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -56,9 +66,9 @@ export default function DeleteButton({
       <AlertDialogTrigger asChild>
         <Button
           size="sm"
-          variant="destructive"
+          variant={variant}
           disabled={isDeleting}
-          className="transition-all"
+          className={`${className ? className : " w-full"} transition-all`}
           aria-label="Delete snippet"
         >
           {isDeleting ? (
@@ -68,7 +78,7 @@ export default function DeleteButton({
             </>
           ) : (
             <>
-              <Trash2 className={`h-4 w-4 text-white ${isText && "mr-2"}`} />
+              <Trash2 className={`h-4 w-4 text-red-600 ${isText && "mr-2"}`} />
               {isText && "Delete"}
             </>
           )}

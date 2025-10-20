@@ -1,10 +1,10 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { Clock } from "lucide-react";
+import { Clock, MoreVertical } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { useEffect, useMemo, useState } from "react";
+import { codeToHtml } from "shiki";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -16,23 +16,24 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { SnippetDTO } from "@/types/snippet";
 import dynamic from "next/dynamic";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
 import ShareButton from "./ShareButton";
 
-const SnippetDetailDialog = dynamic(
-  () => import("../snippets/SnippetDetailDialog"),
-  {
-    ssr: false,
-  }
-);
+// const SnippetDetailDialog = dynamic(
+//   () => import("../snippets/SnippetDetailDialog"),
+//   {
+//     ssr: false,
+//   }
+// );
 
 type Props = {
   snippet: SnippetDTO;
@@ -49,23 +50,59 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
         : new Date(snippet.createdAt),
     [snippet.createdAt]
   );
-  const [open, setOpen] = useState(false);
+  // const [open, setOpen] = useState(false);
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
+
+  useEffect(() => {
+    let cancelled = false;
+    const highlightCode = async () => {
+      try {
+        const html = await codeToHtml(snippet.code, {
+          lang: snippet.language.toLowerCase(),
+          theme: "dark-plus",
+        });
+        if (!cancelled) {
+          setHighlightedCode(html);
+        }
+      } catch {
+        if (!cancelled) {
+          setHighlightedCode(
+            `<pre style="padding: 12px; margin: 0;"><code>${snippet.code.replace(
+              /[&<>"']/g,
+              (m) =>
+                ({
+                  "&": "&amp;",
+                  "<": "&lt;",
+                  ">": "&gt;",
+                  '"': "&quot;",
+                  "'": "&#039;",
+                })[m] || m
+            )}</code></pre>`
+          );
+        }
+      }
+    };
+    highlightCode();
+    return () => {
+      cancelled = true;
+    };
+  }, [snippet.code, snippet.language]);
 
   return (
     <>
       <Card
-        onClick={(e) => {
-          const t = e.target as HTMLElement;
-          if (t.closest("[data-prevent-card-open]")) return;
-          setOpen(true);
-        }}
-        className="group flex h-full flex-col gap-0 transition-shadow hover:shadow-lg cursor-pointer"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            setOpen(true);
-          }
-        }}
+        // onClick={(e) => {
+        //   const t = e.target as HTMLElement;
+        //   if (t.closest("[data-prevent-card-open]")) return;
+        //   setOpen(true);
+        // }}
+        className="group flex h-full flex-col gap-0 transition-shadow hover:shadow-lg"
+        // onKeyDown={(e) => {
+        //   if (e.key === "Enter" || e.key === " ") {
+        //     e.preventDefault();
+        //     setOpen(true);
+        //   }
+        // }}
         role="button"
         tabIndex={0}
         aria-label={`Open snippet: ${snippet.title}`}
@@ -86,28 +123,43 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
               </div>
             </div>
 
-            <div
-              className="flex items-center gap-2"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {!isPrivate && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <ShareButton
-                        isText={false}
-                        snippetId={snippet.id}
-                        title={snippet.title}
-                      />
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">
-                      Share
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              {actions ? <div data-prevent-card-open>{actions}</div> : null}
-            </div>
+            {(!isPrivate || actions) && (
+              <div
+                className="shrink-0 pt-1"
+                onClick={(e) => e.stopPropagation()}
+                data-prevent-card-open
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-muted"
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-16">
+                    {!isPrivate && (
+                      <DropdownMenuItem
+                        asChild
+                        className="w-full cursor-pointer"
+                      >
+                        <ShareButton
+                          isText={true}
+                          snippetId={snippet.id}
+                          title={snippet.title}
+                        />
+                      </DropdownMenuItem>
+                    )}
+                    {!isPrivate && actions && <DropdownMenuSeparator />}
+
+                    {actions && actions}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            )}
           </div>
           {snippet.description ? (
             <CardDescription
@@ -154,24 +206,31 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
             focus-within:border-slate-600
             group-hover:border-yellow-500
             `}
-            title="Click and drag to select code"
           >
             <div className="h-full w-full">
-              <SyntaxHighlighter
-                language={snippet.language.toLowerCase()}
-                style={vscDarkPlus}
-                customStyle={{
-                  margin: 0,
-                  borderRadius: 0,
-                  background: "transparent",
-                  fontSize: "12px",
-                  padding: "12px",
-                }}
-                wrapLongLines
-              >
-                {snippet.code}
-              </SyntaxHighlighter>
+              {highlightedCode ? (
+                <div
+                  className="shiki-code-preview"
+                  dangerouslySetInnerHTML={{ __html: highlightedCode }}
+                  style={{ fontSize: "12px" }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-slate-400 text-sm">
+                  Loading...
+                </div>
+              )}
             </div>
+            <style jsx global>{`
+              .shiki-code-preview pre {
+                margin: 0;
+                padding: 12px;
+                background: transparent !important;
+              }
+              .shiki-code-preview code {
+                font-size: 12px;
+                line-height: 1.5;
+              }
+            `}</style>
           </div>
         </CardContent>
 
@@ -218,13 +277,13 @@ export function SnippetCard({ snippet, actions, compact, isPrivate }: Props) {
         </CardFooter>
       </Card>
 
-      {open && (
+      {/* {open && (
         <SnippetDetailDialog
           open={open}
           onOpenChange={setOpen}
           snippet={snippet}
         />
-      )}
+      )} */}
     </>
   );
 }

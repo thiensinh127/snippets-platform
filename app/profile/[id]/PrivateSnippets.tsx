@@ -7,6 +7,11 @@ import DeleteButton from "@/components/common/DeleteButton";
 import { Suspense } from "react";
 import SnippetGridSkeleton from "@/components/common/SnippetGridSkeleton";
 import { Tags } from "@/types/snippet";
+import {
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { Edit } from "lucide-react";
 
 export default async function PrivateSnippets({
   userId,
@@ -92,12 +97,21 @@ export default async function PrivateSnippets({
               actions={
                 isOwn ? (
                   <div className="flex items-center gap-2">
-                    <Link href={`/snippets/${s.id}/edit`}>
-                      <Button variant="outline" size="sm">
-                        Edit
-                      </Button>
-                    </Link>
-                    <DeleteButton isText={false} snippetId={s.id} />
+                    <DropdownMenuItem>
+                      <Link
+                        className="w-full flex items-center gap-2"
+                        href={`/snippets/${s.id}/edit`}
+                      >
+                        <Button variant="ghost" className="w-full">
+                          <Edit className="text-blue-500 h-4 w-4 mr-2" />
+                          Edit
+                        </Button>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <DeleteButton snippetId={s.id} />
+                    </DropdownMenuItem>
                   </div>
                 ) : undefined
               }

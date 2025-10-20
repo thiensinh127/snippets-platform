@@ -110,18 +110,27 @@ export default async function SnippetPage({
             </Link>
 
             <div className="flex items-center gap-2">
-              <ShareButton snippetId={snippet.id} title={snippet.title} />
+              <ShareButton
+                variant="outline"
+                className="w-fit"
+                snippetId={snippet.id}
+                title={snippet.title}
+              />
               {isAuthor && (
                 <>
                   <Link href={`/snippets/${snippet.id}/edit`}>
                     <Button variant="outline" size="sm">
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span className="hidden sm:inline">
+                      <Edit className="text-blue-600 mr-2 h-4 w-4" />
+                      <span className="hidden sm:inline text-blue-600">
                         {t("common.edit")}
                       </span>
                     </Button>
                   </Link>
-                  <DeleteButton snippetId={snippet.id} />
+                  <DeleteButton
+                    variant="outline"
+                    className="w-fit text-red-600 hover:text-red-600"
+                    snippetId={snippet.id}
+                  />
                 </>
               )}
             </div>

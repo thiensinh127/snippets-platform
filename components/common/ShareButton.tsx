@@ -9,9 +9,22 @@ type Props = {
   snippetId: string;
   title?: string;
   isText?: boolean;
+  className?: string;
+  variant?:
+    | "ghost"
+    | "destructive"
+    | "link"
+    | "outline"
+    | "secondary"
+    | "default";
 };
 
-export default function ShareButton({ snippetId, isText = true }: Props) {
+export default function ShareButton({
+  snippetId,
+  isText = true,
+  className,
+  variant = "ghost",
+}: Props) {
   const [copied, setCopied] = useState(false);
 
   const fallbackCopy = (text: string) => {
@@ -57,9 +70,9 @@ export default function ShareButton({ snippetId, isText = true }: Props) {
     <Button
       type="button"
       size="sm"
-      variant="outline"
+      variant={variant}
       aria-label="Copy snippet link"
-      className="transition-all"
+      className={`${className ? className : " w-full"} transition-all`}
       data-prevent-card-open
       onPointerDown={(e) => e.stopPropagation()}
       onClick={handleShare}

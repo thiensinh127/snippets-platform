@@ -1,5 +1,11 @@
 import type { NextConfig } from "next";
-import createNextIntlPlugin from 'next-intl/plugin'
+import createNextIntlPlugin from "next-intl/plugin";
+import bundleAnalyzer from "@next/bundle-analyzer";
+
+// Bundle analyzer (enabled with ANALYZE=true)
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   // Performance optimizations
@@ -8,7 +14,16 @@ const nextConfig: NextConfig = {
       "lucide-react",
       "@radix-ui/react-avatar",
       "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-select",
+      "@radix-ui/react-tooltip",
+      "@radix-ui/react-tabs",
+      "date-fns",
+      "react-hook-form",
     ],
+    // Enable WebAssembly support for better performance
+    webVitalsAttribution: ["CLS", "LCP", "FCP", "FID", "TTFB", "INP"],
   },
 
   // Image optimization
@@ -30,16 +45,51 @@ const nextConfig: NextConfig = {
   // Compression
   compress: true,
 
-  // Bundle analyzer (uncomment for analysis)
-  // webpack: (config, { isServer }) => {
-  //   if (!isServer) {
-  //     config.resolve.fallback = {
-  //       ...config.resolve.fallback,
-  //       fs: false,
-  //     };
-  //   }
-  //   return config;
-  // },
+  // Production optimizations
+  productionBrowserSourceMaps: false, // Disable source maps in production for smaller builds
+
+  // PoweredByHeader
+  poweredByHeader: false,
+
+  // Bundle analyzer and webpack optimizations
+  webpack: (config, { isServer }) => {
+    // Optimize client-side bundles
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+
+      // Split vendor chunks for better caching
+      if (config.optimization?.splitChunks) {
+        config.optimization.splitChunks.cacheGroups = {
+          ...config.optimization.splitChunks.cacheGroups,
+          codemirror: {
+            test: /[\\/]node_modules[\\/]@codemirror[\\/]/,
+            name: "codemirror-vendor",
+            priority: 30,
+            reuseExistingChunk: true,
+          },
+          radixui: {
+            test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+            name: "radix-vendor",
+            priority: 25,
+            reuseExistingChunk: true,
+          },
+          reactSyntaxHighlighter: {
+            test: /[\\/]node_modules[\\/]react-syntax-highlighter[\\/]/,
+            name: "syntax-highlighter",
+            priority: 20,
+            reuseExistingChunk: true,
+          },
+        };
+      }
+    }
+
+    return config;
+  },
 
   // Headers for caching
   async headers() {
@@ -74,4 +124,4 @@ const nextConfig: NextConfig = {
   },
 };
 const withNextIntl = createNextIntlPlugin();
-export default withNextIntl(nextConfig);
+export default withNextIntl(withBundleAnalyzer(nextConfig));
