@@ -91,41 +91,63 @@ export default function SnippetCodeViewer({
         let mod: any;
         switch (name) {
           case "materialDark":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/material-dark");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/material-dark"
+            );
             break;
           case "oneDark":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/one-dark");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/one-dark"
+            );
             break;
           case "oneLight":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/one-light");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/one-light"
+            );
             break;
           case "nightOwl":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/night-owl");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/night-owl"
+            );
             break;
           case "nord":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/nord");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/nord"
+            );
             break;
           case "okaidia":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/okaidia");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/okaidia"
+            );
             break;
           case "dracula":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/dracula");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/dracula"
+            );
             break;
           case "atomDark":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/atom-dark");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/atom-dark"
+            );
             break;
           case "ghcolors":
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/ghcolors");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/ghcolors"
+            );
             break;
           case "vscDarkPlus":
           default:
-            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus");
+            mod = await import(
+              "react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus"
+            );
             break;
         }
         if (!cancelled) setThemeStyle(mod.default || mod);
       } catch {
         // Fallback to vsc-dark-plus if anything fails
-        const mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus");
+        const mod = await import(
+          "react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus"
+        );
         if (!cancelled) setThemeStyle(mod.default || mod);
       }
     };
@@ -228,19 +250,19 @@ export default function SnippetCodeViewer({
             style={themeStyle ?? {}}
             showLineNumbers
             wrapLongLines
-            customStyle={{
-              margin: 0,
-              padding: "1.5rem",
-              background: "transparent",
-              fontSize: "0.875rem",
-              height: "100%",
-            }}
-            lineNumberStyle={{
-              minWidth: "3em",
-              paddingRight: "1em",
-              color: "#64748b",
-              userSelect: "none",
-            }}
+            // customStyle={{
+            //   margin: 0,
+            //   padding: "1.5rem",
+            //   background: "transparent",
+            //   fontSize: "0.875rem",
+            //   height: "100%",
+            // }}
+            // lineNumberStyle={{
+            //   minWidth: "3em",
+            //   paddingRight: "1em",
+            //   color: "#64748b",
+            //   userSelect: "none",
+            // }}
           >
             {code}
           </SyntaxHighlighter>

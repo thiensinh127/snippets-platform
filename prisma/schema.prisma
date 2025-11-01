@@ -1,19 +1,15 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider      = "prisma-client-js"
-  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGODB_URI")
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["mongoDb"]
 }
 
 model User {
-  id               String    @id @default(cuid())
+  id               String    @id @default(auto()) @map("_id") @db.ObjectId
   email            String    @unique
   password         String
   name             String?
@@ -21,66 +17,45 @@ model User {
   bio              String?
   avatar           String?
   snippets         Snippet[]
-  
-  // Password reset fields
   resetToken       String?
   resetTokenExpiry DateTime?
-  
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-
-  @@index([username])
-  @@index([email])
-  @@index([resetToken])
 }
 
 model Snippet {
-  id          String   @id @default(cuid())
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String?
-  code        String   @db.Text
+  code        String        @db.String
   language    String
   fileName    String?
-
   complexity  String?
-  isPublic    Boolean  @default(true)
-  views       Int      @default(0)
-  slug        String   @unique
-  
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-   tags       SnippetTag[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([authorId])
-  @@index([language])
-  @@index([slug])
-  @@index([createdAt])
+  isPublic    Boolean       @default(true)
+  views       Int           @default(0)
+  slug        String        @unique
+  authorId    String        @db.ObjectId
+  author      User          @relation(fields: [authorId], references: [id])
+  tags        SnippetTag[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
-
 
 model Tag {
-  id        String       @id @default(cuid())
-  name      String       @unique
-  slug      String       @unique
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String        @unique
+  slug      String        @unique
   snippets  SnippetTag[]
-
-  createdAt DateTime     @default(now())
-
-  @@index([slug])
-  @@index([name])
+  createdAt DateTime      @default(now())
 }
 
-
 model SnippetTag {
-  snippetId String
-  tagId     String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  snippetId String   @db.ObjectId
+  tagId     String   @db.ObjectId
+  snippet   Snippet  @relation(fields: [snippetId], references: [id])
+  tag       Tag      @relation(fields: [tagId], references: [id])
+  createdAt DateTime @default(now())
 
-  snippet   Snippet @relation(fields: [snippetId], references: [id], onDelete: Cascade)
-  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([snippetId, tagId])
+  @@unique([snippetId, tagId])
 }
