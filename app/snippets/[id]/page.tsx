@@ -1,6 +1,7 @@
 import DeleteButton from "@/components/common/DeleteButton";
 import ShareButton from "@/components/common/ShareButton";
 import StructuredData from "@/components/seo/StructuredData";
+import SnippetCodeViewer from "@/components/snippets/SnippetCodeViewer";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,11 +16,7 @@ import { getTranslations } from "next-intl/server";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
-const SnippetCodeViewer = dynamic(
-  () => import("@/components/snippets/SnippetCodeViewer"),
-  {}
-);
+import { Suspense } from "react";
 
 export async function generateMetadata({
   params,
@@ -198,12 +195,18 @@ export default async function SnippetPage({
               </Card>
 
               {/* Code Viewer */}
-              <SnippetCodeViewer
-                code={snippet.code}
-                language={snippet.language}
-                fileName={snippet.fileName || undefined}
-                slug={snippet.slug}
-              />
+              <Suspense
+                fallback={
+                  <div className="h-64 w-full border rounded-lg bg-muted/20 animate-pulse" />
+                }
+              >
+                <SnippetCodeViewer
+                  code={snippet.code}
+                  language={snippet.language}
+                  fileName={snippet.fileName || undefined}
+                  slug={snippet.slug}
+                />
+              </Suspense>
             </div>
 
             {/* Right Column: Metadata & Author (1/3 width on large screens) */}

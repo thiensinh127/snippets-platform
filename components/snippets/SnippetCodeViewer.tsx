@@ -17,14 +17,9 @@ import {
   Minimize2,
   Settings,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 import React from "react";
 import { createPortal } from "react-dom";
-
-const CodeBlock = dynamic(() => import("@/components/snippets/CodeBlock"), {
-  ssr: false,
-  loading: () => <div className="h-40 bg-gray-100 rounded-md animate-pulse" />,
-});
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
 const AVAILABLE_THEMES = [
   { value: "vscDarkPlus", label: "VS Code Dark" },
@@ -55,6 +50,7 @@ export default function SnippetCodeViewer({
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
   const [selectedTheme, setSelectedTheme] = React.useState("vscDarkPlus");
+  const [themeStyle, setThemeStyle] = React.useState<any | null>(null);
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -87,6 +83,57 @@ export default function SnippetCodeViewer({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
+  React.useEffect(() => {
+    let cancelled = false;
+    const loadTheme = async (name: string) => {
+      try {
+        let mod: any;
+        switch (name) {
+          case "materialDark":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/material-dark");
+            break;
+          case "oneDark":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/one-dark");
+            break;
+          case "oneLight":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/one-light");
+            break;
+          case "nightOwl":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/night-owl");
+            break;
+          case "nord":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/nord");
+            break;
+          case "okaidia":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/okaidia");
+            break;
+          case "dracula":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/dracula");
+            break;
+          case "atomDark":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/atom-dark");
+            break;
+          case "ghcolors":
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/ghcolors");
+            break;
+          case "vscDarkPlus":
+          default:
+            mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus");
+            break;
+        }
+        if (!cancelled) setThemeStyle(mod.default || mod);
+      } catch {
+        // Fallback to vsc-dark-plus if anything fails
+        const mod = await import("react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus");
+        if (!cancelled) setThemeStyle(mod.default || mod);
+      }
+    };
+    loadTheme(selectedTheme);
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTheme]);
 
   const renderViewer = () => {
     return (
@@ -175,11 +222,29 @@ export default function SnippetCodeViewer({
         </div>
 
         {/* Code Content */}
-        <CodeBlock
-          code={code}
-          language={language}
-          selectedTheme={selectedTheme}
-        />
+        <div className="flex-1 overflow-auto">
+          <SyntaxHighlighter
+            language={language.toLowerCase()}
+            style={themeStyle ?? {}}
+            showLineNumbers
+            wrapLongLines
+            customStyle={{
+              margin: 0,
+              padding: "1.5rem",
+              background: "transparent",
+              fontSize: "0.875rem",
+              height: "100%",
+            }}
+            lineNumberStyle={{
+              minWidth: "3em",
+              paddingRight: "1em",
+              color: "#64748b",
+              userSelect: "none",
+            }}
+          >
+            {code}
+          </SyntaxHighlighter>
+        </div>
       </div>
     );
   };
