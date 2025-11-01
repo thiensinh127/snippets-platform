@@ -1,9 +1,8 @@
-"use client";
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getTranslations } from "next-intl/server";
+
 import { Menu } from "lucide-react";
-import { useTranslations } from "next-intl";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher";
 import ThemeToggle from "@/components/common/ThemeToggle";
 import {
@@ -20,13 +19,21 @@ type MobileNavProps = {
   profileHref?: string;
 };
 
-export default function MobileNav({ isAuthenticated, profileHref }: MobileNavProps) {
-  const t = useTranslations();
+export default async function MobileNav({
+  isAuthenticated,
+  profileHref,
+}: MobileNavProps) {
+  const t = await getTranslations();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon" className="sm:hidden" aria-label="Open menu">
+        <Button
+          variant="outline"
+          size="icon"
+          className="sm:hidden"
+          aria-label="Open menu"
+        >
           <Menu className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>

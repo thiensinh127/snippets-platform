@@ -18,7 +18,12 @@ import { notFound } from "next/navigation";
 
 const SnippetCodeViewer = dynamic(
   () => import("@/components/snippets/SnippetCodeViewer"),
-  {}
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-64 w-full border rounded-lg bg-muted/20 animate-pulse" />
+    ),
+  }
 );
 
 export async function generateMetadata({
