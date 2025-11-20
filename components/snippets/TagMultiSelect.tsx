@@ -17,7 +17,7 @@ import {
   CommandList,
   CommandSeparator,
 } from "@/components/ui/command";
-import { Check, ChevronsUpDown, Plus, X } from "lucide-react";
+import { Check, ChevronDown, ChevronsUpDown, Plus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { slugify } from "@/constants";
 
@@ -135,7 +135,7 @@ export default function TagMultiSelect({
             </div>
 
             {/* RIGHT: caret */}
-            <ChevronsUpDown className="h-4 w-4 opacity-50" />
+            <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
 

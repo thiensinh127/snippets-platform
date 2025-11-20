@@ -8,7 +8,6 @@ export const LANGUAGES: Record<string, string> = {
 
   // 💻 Web
   html: "HTML",
-  htm: "HTML",
   css: "CSS",
   scss: "SCSS",
   less: "Less",
@@ -59,3 +58,11 @@ export function normalizeTags(
   );
   return uniq.map((name) => ({ name, slug: slugify(name) }));
 }
+
+export const TAG_COLORS = [
+  { bg: "bg-red-100", text: "text-red-600", border: "border-red-300" },
+  { bg: "bg-blue-100", text: "text-blue-600", border: "border-blue-300" },
+  { bg: "bg-green-100", text: "text-green-600", border: "border-green-300" },
+  { bg: "bg-purple-100", text: "text-purple-600", border: "border-purple-300" },
+  { bg: "bg-amber-100", text: "text-amber-600", border: "border-amber-300" },
+];

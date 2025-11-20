@@ -16,13 +16,26 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function DeleteButton({
   snippetId,
   isText = true,
+  className = "",
+  variant = "outline",
 }: {
   snippetId: string;
   isText?: boolean;
+  className?: HTMLElement["className"];
+  variant?:
+    | "default"
+    | "destructive"
+    | "link"
+    | "outline"
+    | "secondary"
+    | "ghost"
+    | null
+    | undefined;
 }) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -56,9 +69,9 @@ export default function DeleteButton({
       <AlertDialogTrigger asChild>
         <Button
           size="sm"
-          variant="destructive"
+          variant={variant}
           disabled={isDeleting}
-          className="transition-all"
+          className={cn(className, "transition-all")}
           aria-label="Delete snippet"
         >
           {isDeleting ? (
@@ -68,7 +81,7 @@ export default function DeleteButton({
             </>
           ) : (
             <>
-              <Trash2 className={`h-4 w-4 text-white ${isText && "mr-2"}`} />
+              <Trash2 className={`h-4 w-4 text-red-500 ${isText && "mr-2"}`} />
               {isText && "Delete"}
             </>
           )}

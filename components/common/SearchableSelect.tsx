@@ -15,7 +15,18 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Check, ChevronsDown, ChevronsUpDown } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowDown01,
+  ArrowDownIcon,
+  Check,
+  ChevronDown,
+  ChevronsDown,
+  ChevronsDownIcon,
+  ChevronsUpDown,
+  LucideChevronsDown,
+  MoveDownIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Option = { label: string; value: string };
@@ -61,7 +72,7 @@ export default function SearchableSelect({
           >
             {selected ? selected.label : placeholder}
           </span>
-          <ChevronsDown className="ml-2 h-4 w-4 opacity-50" />
+          <ChevronDown className="ml-2 h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent

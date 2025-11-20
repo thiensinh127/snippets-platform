@@ -1,16 +1,14 @@
-import { prisma } from "@/lib/prisma";
+import { SnippetCard } from "@/components/common/SnippetCard";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { prisma } from "@/lib/prisma";
 import { Code2 } from "lucide-react";
-import { SnippetCard } from "@/components/common/SnippetCard";
 import { getTranslations } from "next-intl/server";
 
-import { Suspense } from "react";
 import SnippetGridSkeleton from "@/components/common/SnippetGridSkeleton";
+import { SnippetActionsMenu } from "@/components/snippets/SnipperActionMenu";
 import { Tags } from "@/types/snippet";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import DeleteButton from "@/components/common/DeleteButton";
+import { Suspense } from "react";
 
 export default async function PublicSnippetsSection({
   userId,
@@ -108,14 +106,10 @@ export default async function PublicSnippetsSection({
                 compact
                 actions={
                   isOwn ? (
-                    <div className="flex items-center gap-2">
-                      <Link href={`/snippets/${s.id}/edit`}>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
-                      </Link>
-                      <DeleteButton isText={false} snippetId={s.id} />
-                    </div>
+                    <SnippetActionsMenu
+                      snippetId={s.id}
+                      editHref={`/snippets/${s.id}/edit`}
+                    />
                   ) : undefined
                 }
               />

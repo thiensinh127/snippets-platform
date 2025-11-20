@@ -205,3 +205,15 @@
 .codemirror-wrapper .cm-activeLine {
   background-color: rgba(255, 255, 255, 0.03);
 }
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE và Edge cũ */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome, Safari, Opera */
+}
