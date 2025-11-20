@@ -360,7 +360,7 @@ export default function SnippetForm({
                       </label>
                       <Input
                         id="fileName"
-                        placeholder="example.js"
+                        placeholder="Enter file name..."
                         {...register("fileName")}
                         className="h-9 w-48"
                       />

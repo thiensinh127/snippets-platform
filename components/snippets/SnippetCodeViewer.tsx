@@ -20,19 +20,20 @@ import {
 import React from "react";
 import { createPortal } from "react-dom";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import vscDarkPlus from "react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus";
 
-const AVAILABLE_THEMES = [
-  { value: "vscDarkPlus", label: "VS Code Dark" },
-  { value: "materialDark", label: "Material Dark" },
-  { value: "oneDark", label: "One Dark" },
-  { value: "oneLight", label: "One Light" },
-  { value: "nightOwl", label: "Night Owl" },
-  { value: "nord", label: "Nord" },
-  { value: "okaidia", label: "Monokai" },
-  { value: "dracula", label: "Dracula" },
-  { value: "atomDark", label: "Atom Dark" },
-  { value: "ghcolors", label: "GitHub" },
-] as const;
+// const AVAILABLE_THEMES = [
+//   { value: "vscDarkPlus", label: "VS Code Dark" },
+//   { value: "materialDark", label: "Material Dark" },
+//   { value: "oneDark", label: "One Dark" },
+//   { value: "oneLight", label: "One Light" },
+//   { value: "nightOwl", label: "Night Owl" },
+//   { value: "nord", label: "Nord" },
+//   { value: "okaidia", label: "Monokai" },
+//   { value: "dracula", label: "Dracula" },
+//   { value: "atomDark", label: "Atom Dark" },
+//   { value: "ghcolors", label: "GitHub" },
+// ] as const;
 
 interface SnippetCodeViewerProps {
   code: string;
@@ -49,8 +50,6 @@ export default function SnippetCodeViewer({
 }: SnippetCodeViewerProps) {
   const [isFullscreen, setIsFullscreen] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
-  const [selectedTheme, setSelectedTheme] = React.useState("vscDarkPlus");
-  const [themeStyle, setThemeStyle] = React.useState<any | null>(null);
   const [copied, setCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -84,79 +83,6 @@ export default function SnippetCodeViewer({
     URL.revokeObjectURL(url);
   };
 
-  React.useEffect(() => {
-    let cancelled = false;
-    const loadTheme = async (name: string) => {
-      try {
-        let mod: any;
-        switch (name) {
-          case "materialDark":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/material-dark"
-            );
-            break;
-          case "oneDark":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/one-dark"
-            );
-            break;
-          case "oneLight":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/one-light"
-            );
-            break;
-          case "nightOwl":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/night-owl"
-            );
-            break;
-          case "nord":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/nord"
-            );
-            break;
-          case "okaidia":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/okaidia"
-            );
-            break;
-          case "dracula":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/dracula"
-            );
-            break;
-          case "atomDark":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/atom-dark"
-            );
-            break;
-          case "ghcolors":
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/ghcolors"
-            );
-            break;
-          case "vscDarkPlus":
-          default:
-            mod = await import(
-              "react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus"
-            );
-            break;
-        }
-        if (!cancelled) setThemeStyle(mod.default || mod);
-      } catch {
-        // Fallback to vsc-dark-plus if anything fails
-        const mod = await import(
-          "react-syntax-highlighter/dist/cjs/styles/prism/vsc-dark-plus"
-        );
-        if (!cancelled) setThemeStyle(mod.default || mod);
-      }
-    };
-    loadTheme(selectedTheme);
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedTheme]);
-
   const renderViewer = () => {
     return (
       <div
@@ -176,24 +102,6 @@ export default function SnippetCodeViewer({
 
           {/* Right: Actions */}
           <div className="flex items-center gap-1">
-            {/* Theme Selector */}
-            <div className="flex items-center gap-2 mr-2">
-              <Settings className="w-3.5 h-3.5 text-slate-400" />
-              <Select value={selectedTheme} onValueChange={setSelectedTheme}>
-                <SelectTrigger className="h-8 w-[120px] text-xs border-slate-700 bg-slate-800/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {AVAILABLE_THEMES.map((theme) => (
-                    <SelectItem key={theme.value} value={theme.value}>
-                      {theme.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Copy Button */}
             <Button
               size="sm"
               variant="ghost"
@@ -247,22 +155,12 @@ export default function SnippetCodeViewer({
         <div className="flex-1 overflow-auto">
           <SyntaxHighlighter
             language={language.toLowerCase()}
-            style={themeStyle ?? {}}
+            style={vscDarkPlus ?? {}}
             showLineNumbers
             wrapLongLines
-            // customStyle={{
-            //   margin: 0,
-            //   padding: "1.5rem",
-            //   background: "transparent",
-            //   fontSize: "0.875rem",
-            //   height: "100%",
-            // }}
-            // lineNumberStyle={{
-            //   minWidth: "3em",
-            //   paddingRight: "1em",
-            //   color: "#64748b",
-            //   userSelect: "none",
-            // }}
+            customStyle={{
+              margin: 0,
+            }}
           >
             {code}
           </SyntaxHighlighter>

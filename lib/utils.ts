@@ -1,48 +1,51 @@
-import { type ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function generateSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "")
-    + "-" + Math.random().toString(36).substring(2, 9)
+  return (
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "") +
+    "-" +
+    Math.random().toString(36).substring(2, 9)
+  );
 }
 
 export function analyzeComplexity(code: string): string {
-  const lowerCode = code.toLowerCase()
-  
+  const lowerCode = code.toLowerCase();
+
   // Nested loops
   if (/(for|while)[\s\S]*?(for|while)/.test(lowerCode)) {
-    return "O(n²)"
+    return "O(n²)";
   }
-  
+
   // Triple nested
   if (/(for|while)[\s\S]*?(for|while)[\s\S]*?(for|while)/.test(lowerCode)) {
-    return "O(n³)"
+    return "O(n³)";
   }
-  
+
   // Sorting algorithms
   if (/sort|quicksort|mergesort|heapsort/.test(lowerCode)) {
-    return "O(n log n)"
+    return "O(n log n)";
   }
-  
+
   // Single loop
   if (/(for|while|foreach|map|filter|reduce)/.test(lowerCode)) {
-    return "O(n)"
+    return "O(n)";
   }
-  
+
   // Logarithmic (binary search)
   if (/binary.*search|binarysearch/.test(lowerCode)) {
-    return "O(log n)"
+    return "O(log n)";
   }
-  
+
   // Constant
-  return "O(1)"
+  return "O(1)";
 }
 
 export const LANGUAGES = [
@@ -61,7 +64,7 @@ export const LANGUAGES = [
   "SQL",
   "HTML",
   "CSS",
-]
+];
 
 export const POPULAR_TAGS = [
   "algorithm",
@@ -79,4 +82,4 @@ export const POPULAR_TAGS = [
   "backend",
   "database",
   "utility",
-]
+];
